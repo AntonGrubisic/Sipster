@@ -1,19 +1,32 @@
 name: CI
-on: [push, pull_request]
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
 jobs:
-  build:
+  build-frontend:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 20 }
-      - name: Backend install+lint+test
-        run: |
-          cd backend
-          npm ci
-          npm test || echo "no tests yet"
-      - name: Frontend install+lint+build
-        run: |
-          cd frontend
-          npm ci
-          npm run build
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: npm ci
+      - run: npm run build
+
+  build-backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: npm ci
+      - run: npm test
