@@ -25,12 +25,20 @@
   color: #111;
 }
 
-.logo{
+.logo {
   width: clamp(260px, 28vw, 360px);
   height: auto;
-  object-fit: contain;
-  max-width: 85vw;
-  margin-top: 2rem;
+  opacity: 0;
+  animation: fadeIn 1.2s ease forwards;
+  transition: transform 0.25s ease;
+}
+
+.logo:hover {
+  transform: scale(1.08);
+}
+
+@keyframes fadeIn {
+  to { opacity: 1; }
 }
 
 .tagline{
