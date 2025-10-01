@@ -1,6 +1,8 @@
 <template>
   <div class="wrap">
-    <img src="/sipster-logo.png" alt="Sipster" class="logo"/>
+    <img src="/sipster-logo.png" alt="Sipster" class="logo" />
+
+    <p class="tagline">A clean, minimal wine guide. Sign in to get started.</p>
 
     <nav class="cta" aria-label="primary">
       <router-link to="/login" class="btn primary">Logga in</router-link>
@@ -9,97 +11,56 @@
   </div>
 </template>
 
-<script setup>
-
-</script>
-
 <style scoped>
-
-.wrap {
+.wrap{
   min-height: 100svh;
-  padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  gap: clamp(16px, 4vw, 28px);
+  justify-content: flex-start;
   text-align: center;
+  padding: 10vh 1rem 1rem;
+  gap: 0;
   background: #fff;
   color: #111;
 }
 
-
-.logo {
-  width: clamp(160px, 32vw, 320px);
+.logo{
+  width: clamp(260px, 28vw, 360px);
   height: auto;
   object-fit: contain;
   max-width: 85vw;
+  margin-top: 2rem;
 }
 
+.tagline{
+  margin: 0 0 clamp(12px, 2.5vw, 18px);
+  color: #555;
+  font-size: clamp(14px, 2.5vw, 16px);
+}
 
-.cta {
+.cta{
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: clamp(10px, 2.5vw, 16px);
-  margin-top: clamp(6px, 2vw, 12px);
+  margin-top: 0.6rem;
 }
 
-.btn {
-  appearance: none;
+.btn{
   text-decoration: none;
-  display: inline-block;
-  line-height: 1;
-  padding: clamp(12px, 2.8vw, 14px) clamp(16px, 4.5vw, 22px);
+  padding: 0.8em 1.6em;
   border-radius: 12px;
   font-weight: 600;
   min-width: clamp(140px, 35vw, 200px);
   text-align: center;
   transition: transform .06s ease, background-color .15s ease, opacity .15s ease;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
 }
+.btn:active{ transform: translateY(1px); }
 
-.btn:active {
-  transform: translateY(1px);
-}
+.primary{ background:#111; color:#fff; }
+.primary:hover{ opacity:.92; }
 
-.primary {
-  background: #111;
-  color: #fff;
-}
-
-.primary:hover {
-  opacity: .92;
-}
-
-.ghost {
-  background: #fff;
-  color: #111;
-  border: 1px solid #e6e6e6;
-}
-
-.ghost:hover {
-  background: #f7f7f7;
-}
-
-
-@media (min-width: 480px) {
-  .btn {
-    min-width: 180px;
-  }
-}
-
-@media (min-width: 768px) {
-  .logo {
-    width: clamp(220px, 22vw, 360px);
-  }
-}
-
-
-@media (prefers-reduced-motion: reduce) {
-  .btn {
-    transition: none;
-  }
-}
+.ghost{ background:#fff; color:#111; border:1px solid #ddd; }
+.ghost:hover{ background:#f7f7f7; }
 </style>
