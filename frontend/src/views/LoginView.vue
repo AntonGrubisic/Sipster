@@ -2,17 +2,17 @@
   <div class="wrap">
     <SiteHeader />
     <form class="card" @submit.prevent="submit">
-      <h2>Logga in</h2>
+
       <label>
-        E-post
+        Email
         <input v-model="email" type="email" required />
       </label>
       <label>
-        Lösenord
+        Password
         <input v-model="password" type="password" required />
       </label>
-      <button class="btn primary" type="submit">Logga in</button>
-      <p class="small">Har du inget konto? <router-link to="/register">Registrera</router-link></p>
+      <button class="btn primary" type="submit">Log in</button>
+      <p class="small">No account? Get one! <router-link to="/register">Signup</router-link></p>
     </form>
   </div>
 </template>

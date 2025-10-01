@@ -5,8 +5,8 @@
     <p class="tagline">A clean, minimal wine guide. Sign in to get started.</p>
 
     <nav class="cta" aria-label="primary">
-      <router-link to="/login" class="btn primary">Logga in</router-link>
-      <router-link to="/register" class="btn ghost">Registrera</router-link>
+      <router-link to="/login" class="btn primary">Login</router-link>
+      <router-link to="/register" class="btn ghost">Signup</router-link>
     </nav>
   </div>
 </template>
