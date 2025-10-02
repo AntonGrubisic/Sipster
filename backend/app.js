@@ -1,15 +1,18 @@
+// backend/app.js
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const pool = require('./connectionMySQL');
+const { warmCache } = require('./services/winesService'); // <-- cache warm-up
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Health check
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
 
-// snabb DB-koll
+// Quick DB connectivity check
 app.get('/api/db-check', async (_req, res) => {
   try {
     const [rows] = await pool.query('SELECT 1 AS ok');
@@ -20,6 +23,16 @@ app.get('/api/db-check', async (_req, res) => {
   }
 });
 
-const port = process.env.PORT || 8080;
-app.listen(port, () => console.log(`Backend kör på http://localhost:${port}`));
+// Routes
+const wines = require('./routes/wines');
+app.use('/api/wines', wines);
 
+const port = process.env.PORT || 8080;
+
+// Warm the wine cache, then start the server.
+// If warm-up fails, we still start and will fetch on-demand.
+warmCache().finally(() => {
+  app.listen(port, () => console.log(`Backend running at http://localhost:${port}`));
+});
+
+module.exports = app;
