@@ -1,10 +1,10 @@
 // backend/services/winesService.js
 
 const BASE = 'https://api.sampleapis.com/wines';
-const CATEGORIES = ['reds', 'whites', 'sparkling', 'rose', 'dessert'];
+const CATEGORIES = ['reds', 'whites', 'sparkling', 'rose', 'dessert', 'port'];
 
 // In-memory cache
-let cache = { data: null, fetchedAt: 0 };
+let cache = {data: null, fetchedAt: 0};
 const TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 function isFresh() {
@@ -13,14 +13,22 @@ function isFresh() {
 
 async function fetchRemote() {
     const urls = CATEGORIES.map(c => `${BASE}/${c}`);
+    const t0 = Date.now();
+
     const resps = await Promise.all(urls.map(u => fetch(u)));
     for (const r of resps) {
         if (!r.ok) throw new Error(`Upstream fetch failed: ${r.status} ${r.statusText}`);
     }
+
     const jsons = await Promise.all(resps.map(r => r.json()));
-    const merged = jsons.flatMap((arr, i) => (arr || []).map(w => ({ ...w, style: CATEGORIES[i] })));
+    const merged = jsons.flatMap((arr, i) => (arr || []).map(w => ({...w, style: CATEGORIES[i]})));
+
+    const ms = Date.now() - t0;
+    console.log(`[winesService] fetched ${merged.length} items from ${CATEGORIES.length} categories in ${ms}ms`);
+
     return merged;
 }
+
 
 /**
  * Get all wines with stale-while-revalidate behavior:
@@ -29,24 +37,31 @@ async function fetchRemote() {
  * - If empty: fetch now (throws if fails)
  */
 async function getAllWines() {
-    if (isFresh()) return cache.data;
+    if (isFresh()) {
+        // fresh cache
+        // console.log('[winesService] cache HIT (fresh)');
+        return cache.data;
+    }
 
     if (cache.data) {
-        // stale-while-revalidate: kick off background refresh
+        // stale cache → serve now, refresh in background
+        console.log('[winesService] cache STALE → serving stale and refreshing in background');
         refreshInBackground();
         return cache.data;
     }
 
-    // cold start: must fetch now
+    // cold start
+    console.log('[winesService] cache MISS → fetching now');
     const data = await fetchRemote();
-    cache = { data, fetchedAt: Date.now() };
+    cache = {data, fetchedAt: Date.now()};
     return data;
 }
+
 
 async function refreshInBackground() {
     try {
         const data = await fetchRemote();
-        cache = { data, fetchedAt: Date.now() };
+        cache = {data, fetchedAt: Date.now()};
     } catch (err) {
         // swallow errors on background refresh; keep stale cache
         console.error('[winesService] background refresh failed:', err.message);
