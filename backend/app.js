@@ -6,26 +6,26 @@ console.log('[app] booting…');
 const express = require('express');
 const cors = require('cors');
 
-// Services (optional)
 let warmCache, warmPairings;
 try {
-    ({warmCache} = require('./services/winesService'));
+    ({ warmCache } = require('./services/winesService'));
 } catch (e) {
     console.warn('[app] winesService not loaded:', e.message);
 }
 try {
-    ({warmPairings} = require('./services/pairingsService')); // NOTE: pairingsService.js
+    ({ warmPairings } = require('./services/pairingsService'));
 } catch (e) {
     console.warn('[app] pairingsService not loaded:', e.message);
 }
 
-// Routers
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.get('/api/health', (_req, res) => res.json({ok: true, ts: Date.now()}));
+// Health check
+app.get('/api/health', (_req, res) => res.json({ ok: true, ts: Date.now() }));
 
+// Routes
 try {
     app.use('/api/wines', require('./routes/wines'));
     console.log('[app] /api/wines mounted');
@@ -42,7 +42,7 @@ try {
 
 const port = process.env.PORT || 8080;
 
-// ✅ Start server immediately; warm caches in background
+// Start server and warm caches
 app.listen(port, () => {
     console.log(`[app] listening on http://localhost:${port}`);
 
