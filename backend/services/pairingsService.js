@@ -2,7 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 
-let sets = { basic: [], gourmet: [] };
+let sets = {basic: [], gourmet: []};
 
 function loadJsonSafe(relPath) {
     try {
