@@ -20,16 +20,30 @@
       </button>
     </section>
 
+    <!-- Filter input -->
+    <section class="filter" v-if="selectedStyle">
+      <input
+          v-model="query"
+          class="input"
+          type="text"
+          placeholder="Filter by wine, grape, or winery…"
+          aria-label="Filter wines"
+      />
+    </section>
+
     <!-- State -->
     <p v-if="error" class="err">{{ error }}</p>
     <p v-else-if="loading" class="loading">Loading…</p>
-    <p v-else-if="!loading && wines.length === 0 && selectedStyle" class="empty">
-      No wines found for “{{ labelFor(selectedStyle) }}”.
+    <p
+        v-else-if="!loading && filteredWines.length === 0 && selectedStyle"
+        class="empty"
+    >
+      No wines match “{{ query }}” in “{{ labelFor(selectedStyle) }}”.
     </p>
 
     <!-- Results -->
-    <section v-if="wines.length" class="grid">
-      <article v-for="w in wines" :key="w.id" class="card">
+    <section v-if="filteredWines.length" class="grid">
+      <article v-for="w in filteredWines" :key="w.id" class="card">
         <div class="thumb">
           <img v-if="w.image" :src="w.image" alt="" />
           <div v-else class="ph">🍷</div>
@@ -52,12 +66,12 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 const CATS = [
-  { key: 'reds', label: 'Red',       icon: '🍷' },
-  { key: 'whites', label: 'White',   icon: '🥂' },
-  { key: 'rose', label: 'Rosé',      icon: '🌸' },
+  { key: 'reds', label: 'Red', icon: '🍷' },
+  { key: 'whites', label: 'White', icon: '🥂' },
+  { key: 'rose', label: 'Rosé', icon: '🌸' },
   { key: 'sparkling', label: 'Sparkling', icon: '✨' },
   { key: 'dessert', label: 'Dessert', icon: '🍮' }
 ]
@@ -66,6 +80,7 @@ const selectedStyle = ref('')
 const wines = ref([])
 const loading = ref(false)
 const error = ref('')
+const query = ref('')
 
 function labelFor(styleKey) {
   const f = CATS.find(c => c.key === styleKey)
@@ -92,6 +107,17 @@ async function selectStyle(style) {
     loading.value = false
   }
 }
+
+const filteredWines = computed(() => {
+  const q = query.value.trim().toLowerCase()
+  if (!q) return wines.value
+  return wines.value.filter(w => {
+    const name = (w.name || '').toLowerCase()
+    const grape = (w.grape || '').toLowerCase()
+    const winery = (w.winery || '').toLowerCase()
+    return name.includes(q) || grape.includes(q) || winery.includes(q)
+  })
+})
 </script>
 
 <style scoped>
@@ -110,6 +136,13 @@ async function selectStyle(style) {
 .tile.active { border-color: #111; box-shadow: 0 10px 18px rgba(0,0,0,.06); }
 .emoji { font-size: 1.6rem; }
 .label { font-weight: 700; }
+
+.filter { display: flex; margin-top: .25rem; }
+.filter .input {
+  flex: 1 1 auto; max-width: 520px; padding: .75rem 1rem;
+  border: 1px solid #e7e7e7; border-radius: 12px;
+}
+.filter .input:focus { border-color: #bdbdbd; outline: none; }
 
 .err { color: #b00020; }
 .loading, .empty { opacity: .8; }
