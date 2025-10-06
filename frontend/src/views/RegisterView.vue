@@ -2,21 +2,30 @@
   <div class="wrap">
     <SiteHeader/>
     <form class="card" @submit.prevent="submit">
+      <h2>Create Account</h2>
 
       <label>
         Name
-        <input v-model="name" type="text"/>
+        <input v-model="name" type="text" :disabled="isLoading"/>
       </label>
       <label>
         Email
-        <input v-model="email" type="email" required/>
+        <input v-model="email" type="email" required :disabled="isLoading"/>
       </label>
       <label>
         Password
-        <input v-model="password" type="password" required/>
+        <input v-model="password" type="password" required :disabled="isLoading"/>
       </label>
-      <button class="btn primary" type="submit">Signup</button>
-      <p class="small">Already in the heat?
+
+      <!-- FELMEDDELANDE -->
+      <p v-if="error" class="error-message">{{ error }}</p>
+
+      <button class="btn primary" type="submit" :disabled="isLoading">
+        {{ isLoading ? 'Signing Up...' : 'Signup' }}
+      </button>
+
+      <p class="small">
+        Already in the heat?
         <router-link to="/login">Login</router-link>
       </p>
     </form>
@@ -25,16 +34,39 @@
 
 <script setup>
 import {ref} from 'vue'
+import { useRouter } from 'vue-router'
 import SiteHeader from '../components/SiteHeader.vue'
-// TODO: koppla till register({name,email,password})
+import { registerUser } from '../services/authService' // Importera servicen
+
+const router = useRouter()
 const name = ref('');
 const email = ref('');
 const password = ref('')
-const submit = () => { /* call register and route to /login or / */
+const error = ref(null)
+const isLoading = ref(false)
+
+const submit = async () => {
+  error.value = null; // Rensa gamla fel
+  isLoading.value = true;
+
+  try {
+    // Observera att vi skickar name som username till backend
+    await registerUser(email.value, name.value, password.value);
+
+    // Vid lyckad registrering, skicka användaren till inloggningssidan
+    router.push('/login');
+
+  } catch (err) {
+    // Fånga felmeddelandet från backend (t.ex. "Password is too weak")
+    error.value = err.message;
+  } finally {
+    isLoading.value = false;
+  }
 }
 </script>
 
 <style scoped>
+/* Befintlig CSS från dig */
 .wrap {
   min-height: 100dvh;
   display: flex;
@@ -77,6 +109,11 @@ input {
   background: #111;
   color: #fff;
   font-weight: 600;
+  transition: background-color 0.2s;
+}
+.btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
 }
 
 .small {
@@ -84,5 +121,14 @@ input {
   font-size: 13px;
   color: #666;
   margin-top: 10px;
+}
+.error-message {
+  color: #e03131;
+  background-color: #fcebeb;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  font-size: 14px;
+  border: 1px solid #f99;
 }
 </style>

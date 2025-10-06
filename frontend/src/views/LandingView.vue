@@ -2,14 +2,95 @@
   <div class="wrap">
     <img src="/sipster-logo.png" alt="Sipster" class="logo" />
 
-    <p class="tagline">A clean, minimal wine guide. Sign in to get started.</p>
+    <div v-if="!isAuthenticated" class="content">
+      <!-- Visas när användaren ÄR UTlOGGAD -->
+      <p class="tagline">A clean, minimal wine guide. Sign in to get started.</p>
+      <nav class="cta" aria-label="primary">
+        <router-link to="/login" class="btn primary">Login</router-link>
+        <router-link to="/register" class="btn ghost">Signup</router-link>
+      </nav>
+    </div>
 
-    <nav class="cta" aria-label="primary">
-      <router-link to="/login" class="btn primary">Login</router-link>
-      <router-link to="/register" class="btn ghost">Signup</router-link>
-    </nav>
+    <div v-else class="content">
+      <!-- Visas när användaren ÄR INLOGGAD -->
+      <p v-if="loading" class="tagline">Loading protected data...</p>
+      <p v-else-if="error" class="tagline error">Error: {{ error }}</p>
+      <p v-else class="tagline success">
+        <!-- Message kommer från backendens /api/protected rutt -->
+        {{ protectedMessage }}
+      </p>
+
+      <nav class="cta" aria-label="primary">
+        <button @click="handleLogout" class="btn primary">Logout</button>
+      </nav>
+    </div>
   </div>
 </template>
+
+<script setup>
+import { ref, onMounted, computed } from 'vue';
+import { useRouter } from 'vue-router';
+// Importera de nödvändiga funktionerna från servicen
+import { getProtectedData, logoutUser } from '../services/authService';
+
+const router = useRouter();
+
+// STATE
+const protectedMessage = ref('');
+const loading = ref(true);
+const error = ref(null);
+
+// Kontrollerar om en token finns i localStorage
+const isAuthenticated = computed(() => {
+  return !!localStorage.getItem('userToken');
+});
+
+/**
+ * Hämtar skyddad data från backend med token.
+ */
+async function loadProtectedData() {
+  if (!isAuthenticated.value) {
+    loading.value = false;
+    return;
+  }
+
+  loading.value = true;
+  error.value = null;
+
+  try {
+    const data = await getProtectedData();
+    // Sparar det engelska välkomstmeddelandet från backend
+    protectedMessage.value = data.message;
+  } catch (err) {
+    // Om backend returnerar 401 (token utgånget/ogiltig), logga ut
+    if (err.status === 401) {
+      handleLogout();
+    } else {
+      // Annat fel (t.ex. nätverksfel)
+      error.value = err.message;
+    }
+  } finally {
+    loading.value = false;
+  }
+}
+
+/**
+ * Loggar ut användaren genom att ta bort token och navigera.
+ */
+function handleLogout() {
+  logoutUser();
+  router.push('/login'); // Skicka till loginsidan efter utloggning
+}
+
+// Ladda data när komponenten först laddas och även när den återvänder
+onMounted(() => {
+  // Kontrollera om användaren är inloggad vid sidladdning
+  if (isAuthenticated.value) {
+    loadProtectedData();
+  }
+});
+
+</script>
 
 <style scoped>
 .wrap{
@@ -41,10 +122,23 @@
   to { opacity: 1; }
 }
 
+.content {
+  margin-top: 2rem;
+}
+
 .tagline{
   margin: 0 0 clamp(12px, 2.5vw, 18px);
   color: #555;
   font-size: clamp(14px, 2.5vw, 16px);
+}
+
+.tagline.success {
+  color: #058800;
+  font-weight: 600;
+}
+
+.tagline.error {
+  color: #ff3333;
 }
 
 .cta{
