@@ -1,31 +1,74 @@
+// backend/app.js
 require('dotenv').config();
+
+console.log('[app] booting…');
+
 const express = require('express');
 const cors = require('cors');
-const { warmCache } = require('./services/winesService');
-const { warmPairings } = require('./services/pairingsService'); // ✅ correct file name (pairingsService.js)
 
+// Services (optional)
+let warmCache, warmPairings;
+try {
+    ({warmCache} = require('./services/winesService'));
+} catch (e) {
+    console.warn('[app] winesService not loaded:', e.message);
+}
+try {
+    ({warmPairings} = require('./services/pairingsService')); // NOTE: pairingsService.js
+} catch (e) {
+    console.warn('[app] pairingsService not loaded:', e.message);
+}
+
+// Routers
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// health checks
-app.get('/api/health', (_req, res) => res.json({ ok: true }));
+app.get('/api/health', (_req, res) => res.json({ok: true, ts: Date.now()}));
 
-// mount wine routes (search + health)
-const wines = require('./routes/wines');
-app.use('/api/wines', wines);
+try {
+    app.use('/api/wines', require('./routes/wines'));
+    console.log('[app] /api/wines mounted');
+} catch (e) {
+    console.warn('[app] wines routes not mounted:', e.message);
+}
 
-// mount pairing routes
-const pairings = require('./routes/pairings');
-app.use('/api/pairings', pairings);
+try {
+    app.use('/api/pairings', require('./routes/pairings'));
+    console.log('[app] /api/pairings mounted');
+} catch (e) {
+    console.warn('[app] pairings routes not mounted:', e.message);
+}
 
 const port = process.env.PORT || 8080;
 
-// ✅ Warm both caches before starting
-warmPairings(); // preloads basic + gourmet data immediately
+// ✅ Start server immediately; warm caches in background
+app.listen(port, () => {
+    console.log(`[app] listening on http://localhost:${port}`);
 
-warmCache().finally(() => {
-    app.listen(port, () => console.log(`Backend running at http://localhost:${port}`));
+    const tasks = [];
+    if (typeof warmPairings === 'function') {
+        tasks.push(
+            Promise.resolve()
+                .then(() => warmPairings())
+                .then(() => console.log('[app] pairings warmed'))
+                .catch(err => console.warn('[app] pairings warm failed:', err?.message || err))
+        );
+    }
+    if (typeof warmCache === 'function') {
+        tasks.push(
+            Promise.resolve()
+                .then(() => warmCache())
+                .then(() => console.log('[app] wines cache warmed'))
+                .catch(err => console.warn('[app] wines warm failed:', err?.message || err))
+        );
+    }
+
+    if (tasks.length) {
+        Promise.allSettled(tasks).then(() => console.log('[app] warm-up tasks settled'));
+    } else {
+        console.log('[app] no warm-up tasks registered');
+    }
 });
 
 module.exports = app;
