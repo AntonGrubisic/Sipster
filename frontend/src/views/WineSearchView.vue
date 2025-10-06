@@ -1,47 +1,76 @@
 <template>
   <main class="page">
-    <div class="container">
-      <header class="hero">
-        <h1>Explore Wines by Style</h1>
-        <p class="sub">Tap a style to browse examples from our catalog.</p>
-      </header>
+    <!-- Fade-in hero -->
+    <header class="hero" v-cloak>
+      <h1>The Journey of Wine</h1>
+      <p class="sub">
+        Discover timeless vintages and modern favorites, curated by style and flavor.
+      </p>
+    </header>
 
-      <!-- Category tiles -->
-      <section class="tiles">
+    <!-- 🔎 Elegant search (name or grape) -->
+    <section class="search-wrap" aria-label="Wine search">
+      <div class="search">
+        <input
+            v-model="searchTerm"
+            @keyup.enter="searchWines"
+            type="text"
+            inputmode="search"
+            autocomplete="off"
+            placeholder="Search by name or grape…"
+            aria-label="Search wines by name or grape"
+        />
+        <button class="search-btn" @click="searchWines">Search</button>
+      </div>
+    </section>
+
+    <!-- 🍇 Wine categories -->
+    <section class="tiles" aria-label="Wine styles">
+      <TransitionGroup name="fadeup" tag="div" class="tiles-inner" appear>
         <button
-            v-for="c in CATS"
+            v-for="(c, idx) in CATS"
             :key="c.key"
             class="tile"
             :class="{ active: c.key === selectedStyle }"
             @click="selectStyle(c.key)"
             :aria-pressed="c.key === selectedStyle"
+            :style="{ transitionDelay: (idx * 60) + 'ms' }"
+            @mousemove="onTileMove($event, idx)"
+            @mouseleave="onTileLeave(idx)"
+            ref="tileRefs"
         >
-          <div class="emoji">{{ c.icon }}</div>
-          <div class="label">{{ c.label }}</div>
+          <div class="image-wrap">
+            <img
+                :src="`/images/${c.key}.jpg`"
+                :alt="c.label"
+                class="tile-img"
+                @error="(e) => e.target.style.visibility = 'hidden'"
+                :style="tileStyles[idx]?.img"
+            />
+            <div class="overlay" :style="tileStyles[idx]?.overlay">
+              <span class="label">{{ c.label }}</span>
+            </div>
+          </div>
         </button>
-      </section>
+      </TransitionGroup>
+    </section>
 
-      <!-- Filter input (client-side) -->
-      <section class="filter" v-if="selectedStyle">
-        <input
-            v-model="query"
-            class="input"
-            type="text"
-            placeholder="Filter by wine, grape, or winery…"
-            aria-label="Filter wines"
-        />
-      </section>
+    <!-- 🕓 State messages -->
+    <p v-if="error" class="err">{{ error }}</p>
+    <p v-else-if="loading" class="loading">Loading…</p>
+    <p v-else-if="!loading && wines.length === 0 && (selectedStyle || searchTerm)" class="empty">
+      No wines found for “{{ selectedStyle ? labelFor(selectedStyle) : searchTerm }}”.
+    </p>
 
-      <!-- State -->
-      <p v-if="error" class="err">{{ error }}</p>
-      <p v-else-if="loading" class="loading">Loading…</p>
-      <p v-else-if="!loading && filteredWines.length === 0 && selectedStyle" class="empty">
-        No wines match “{{ query }}” in “{{ labelFor(selectedStyle) }}”.
-      </p>
-
-      <!-- Results -->
-      <section v-if="filteredWines.length" class="grid">
-        <article v-for="w in filteredWines" :key="w.id" class="card">
+    <!-- 🍷 Results grid -->
+    <section v-if="wines.length" class="grid" aria-live="polite">
+      <TransitionGroup name="fadeup" tag="div" class="grid-inner" appear>
+        <article
+            v-for="(w, idx) in wines"
+            :key="w.id"
+            class="card"
+            :style="{ transitionDelay: (idx * 30) + 'ms' }"
+        >
           <div class="thumb">
             <img v-if="w.image" :src="w.image" alt="" />
             <div v-else class="ph">🍷</div>
@@ -59,36 +88,87 @@
             </div>
           </div>
         </article>
-      </section>
-    </div>
+      </TransitionGroup>
+    </section>
   </main>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, reactive, onMounted, nextTick } from 'vue'
 
 const CATS = [
-  { key: 'reds',      label: 'Red',       icon: '🍷' },
-  { key: 'whites',    label: 'White',     icon: '🥂' },
-  { key: 'rose',      label: 'Rosé',      icon: '🌸' },
-  { key: 'sparkling', label: 'Sparkling', icon: '✨' },
-  { key: 'dessert',   label: 'Dessert',   icon: '🍮' }
+  { key: 'reds', label: 'Red' },
+  { key: 'whites', label: 'White' },
+  { key: 'rose', label: 'Rosé' },
+  { key: 'sparkling', label: 'Sparkling' },
+  { key: 'dessert', label: 'Dessert' },
 ]
 
 const selectedStyle = ref('')
 const wines = ref([])
 const loading = ref(false)
 const error = ref('')
-const query = ref('')
+const searchTerm = ref('')
+
+// --- Parallax hover state (per tile) ---
+const tileRefs = ref([])
+const tileStyles = reactive([])
+
+function ensureTileStyle(i) {
+  if (!tileStyles[i]) {
+    tileStyles[i] = { img: {}, overlay: {} }
+  }
+}
+
+function onTileMove(e, i) {
+  ensureTileStyle(i)
+  const el = tileRefs.value[i]
+  if (!el) return
+  const rect = el.getBoundingClientRect()
+  const x = e.clientX - rect.left
+  const y = e.clientY - rect.top
+  const cx = (x / rect.width) - 0.5
+  const cy = (y / rect.height) - 0.5
+
+  const drift = 8
+  tileStyles[i].img = {
+    transform: `translate(${(-cx * drift)}px, ${(-cy * drift)}px) scale(1.04)`,
+    filter: `brightness(0.9)`
+  }
+
+  const overlayLift = 6
+  tileStyles[i].overlay = {
+    transform: `translateY(${(-Math.abs(cy) * overlayLift)}px)`,
+    opacity: 1
+  }
+}
+
+function onTileLeave(i) {
+  ensureTileStyle(i)
+  tileStyles[i].img = { transform: 'translate(0,0) scale(1)', filter: 'brightness(1)' }
+  tileStyles[i].overlay = { transform: 'translateY(0)' }
+}
+
+// --- Sorting helpers ---
+function displayName(w) {
+  return (w.name || w.wine || '').toString()
+}
+function sortByName(arr) {
+  return (arr || []).slice().sort((a, b) =>
+      displayName(a).localeCompare(displayName(b), undefined, { sensitivity: 'base' })
+  )
+}
 
 function labelFor(styleKey) {
   const f = CATS.find(c => c.key === styleKey)
   return f ? f.label : styleKey
 }
 
+// --- Load by style ---
 async function selectStyle(style) {
   if (selectedStyle.value === style) return
   selectedStyle.value = style
+  searchTerm.value = ''
   wines.value = []
   error.value = ''
   loading.value = true
@@ -99,7 +179,8 @@ async function selectStyle(style) {
       throw new Error(j.error || `Request failed (${res.status})`)
     }
     const data = await res.json()
-    wines.value = data.results || []
+    wines.value = sortByName(data.results || [])
+    await nextTick()
   } catch (e) {
     error.value = e.message || 'Failed to load wines.'
   } finally {
@@ -107,92 +188,198 @@ async function selectStyle(style) {
   }
 }
 
-const filteredWines = computed(() => {
-  const q = query.value.trim().toLowerCase()
-  if (!q) return wines.value
-  return wines.value.filter(w => {
-    const name = (w.name || '').toLowerCase()
-    const grape = (w.grape || '').toLowerCase()
-    const winery = (w.winery || '').toLowerCase()
-    return name.includes(q) || grape.includes(q) || winery.includes(q)
-  })
+// --- Search wines ---
+async function searchWines() {
+  const q = searchTerm.value.trim()
+  if (!q) return
+  selectedStyle.value = ''
+  wines.value = []
+  error.value = ''
+  loading.value = true
+  try {
+    const res = await fetch(`/api/wines/search?q=${encodeURIComponent(q)}&limit=60`)
+    if (!res.ok) {
+      const j = await res.json().catch(() => ({}))
+      throw new Error(j.error || `Request failed (${res.status})`)
+    }
+    const data = await res.json()
+    wines.value = sortByName(data.results || [])
+  } catch (e) {
+    error.value = e.message || 'Failed to load wines.'
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  tileStyles.length = CATS.length
+  for (let i = 0; i < CATS.length; i++) ensureTileStyle(i)
 })
 </script>
 
 <style scoped>
-/* Page: subtle background & spacing */
+[v-cloak] { opacity: 0; }
+
+/* Page + hero base */
 .page {
   min-height: 100vh;
-  padding: 3rem 1rem 2.5rem;
-  display: block;
-  background:
-      radial-gradient(1200px 400px at 10% 0%, #faf6f2 0%, transparent 60%),
-      radial-gradient(1000px 350px at 90% 0%, #f7f3ef 0%, transparent 60%),
-      #ffffff;
+  padding: 2rem 1rem;
+  display: grid;
+  gap: 1.5rem;
+  justify-content: center;
+  text-align: center;
+  background: #faf8f6;
 }
 
-/* Centered content width */
-.container { max-width: 1100px; margin: 0 auto; }
+/* Hero fade-in */
+.hero {
+  text-align: center;
+  margin: 0.5rem auto 0;
+  max-width: 900px;
+  padding: 0 1rem 0.5rem;
+  animation: heroFade 700ms ease-out both;
+  animation-delay: 60ms;
+}
+@keyframes heroFade {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
-/* Hero typography */
 .hero h1 {
-  margin: 0 0 .25rem;
-  font-size: clamp(1.8rem, 2.6vw, 2.4rem);
-  font-weight: 800;
+  margin: 0;
+  font-weight: 900;
+  font-size: clamp(2.2rem, 4.2vw, 3.2rem);
   letter-spacing: -0.02em;
+  line-height: 1.05;
+  color: #3a2c28;
 }
-.sub { margin: .25rem 0 1rem; opacity: .7; font-size: 0.98rem; }
+.hero h1::after {
+  content: "";
+  display: block;
+  width: 84px; height: 3px;
+  margin: 0.9rem auto 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #bca897, #7b1113);
+  opacity: 0.85;
+}
+.sub {
+  margin: 0.9rem auto 0;
+  max-width: 720px;
+  font-size: clamp(0.98rem, 1.4vw, 1.05rem);
+  line-height: 1.55;
+  color: #5a4a45;
+  opacity: 0.85;
+}
 
-/* Tiles: slightly richer look */
-.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: .8rem; }
+/* 🔎 Search */
+.search-wrap {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 0.25rem;
+}
+.search {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 360px;
+  background: #f7f4f1;
+  border: 1px solid #d9d1cb;
+  border-radius: 12px;
+  padding: 0.35rem 0.6rem;
+}
+.search input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.95rem;
+  color: #3a2c28;
+  padding: 0.35rem 0.25rem;
+}
+.search input::placeholder { color: #9b8f88; }
+.search-btn {
+  background: #7b1113;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+.search-btn:hover { background: #92171a; transform: translateY(-1px); }
+.search-btn:active { transform: translateY(0); }
+
+/* Tiles */
+.tiles { display: flex; justify-content: center; }
+.tiles-inner {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  padding: 0 0.5rem;
+}
 .tile {
-  border: 1px solid #ece9e6;
-  border-radius: 16px;
-  padding: 1rem;
-  background: linear-gradient(#fff, #fdfcfc);
-  cursor: pointer; text-align: center;
-  display: grid; gap: .4rem; place-items: center;
-  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+  border: none; border-radius: 20px; background: none; cursor: pointer;
+  width: 180px; height: 240px; overflow: hidden; position: relative;
+  transition: transform 0.25s ease, box-shadow 0.25s ease; will-change: transform;
 }
-.tile:hover { transform: translateY(-2px); box-shadow: 0 10px 18px rgba(0,0,0,.06); border-color: #e5e2df; }
-.tile.active { border-color: #8b1e3f; box-shadow: 0 10px 24px rgba(139, 30, 63, .08); }
-.emoji { font-size: 1.6rem; }
-.label { font-weight: 700; letter-spacing: .2px; }
-
-/* Filter input */
-.filter { display: flex; margin-top: .5rem; }
-.filter .input {
-  flex: 1 1 auto; max-width: 560px; padding: .8rem 1rem;
-  border: 1px solid #e7e4e1; border-radius: 12px; background: #fff;
+.tile:hover { transform: translateY(-6px); }
+.image-wrap {
+  width: 100%; height: 100%; position: relative; border-radius: 20px; overflow: hidden;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.08);
 }
-.filter .input:focus { border-color: #c9c3be; outline: none; box-shadow: 0 0 0 3px rgba(139, 30, 63, .08); }
+.tile-img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform 300ms ease, filter 300ms ease;
+}
+.overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.5), rgba(0,0,0,0.08));
+  display: flex; align-items: flex-end; justify-content: center;
+  transition: opacity 250ms ease, transform 250ms ease;
+  opacity: 0;
+}
+.tile:hover .overlay { opacity: 1; }
+.label { color: #fff; font-weight: 700; font-size: 1.1rem; padding-bottom: 0.9rem; }
 
-/* Messages */
-.err { color: #b00020; }
-.loading, .empty { opacity: .8; margin-top: .25rem; }
-
-/* Grid & cards */
-.grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+/* Results */
+.grid { display: grid; }
+.grid-inner {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
 .card {
-  display: grid; grid-template-columns: 84px 1fr; gap: .75rem;
-  border: 1px solid #ece9e6; border-radius: 16px; padding: .75rem;
-  background: linear-gradient(#fff, #fefefe);
-  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+  display: grid; grid-template-columns: 80px 1fr; gap: .75rem;
+  border: 1px solid #eee; border-radius: 16px; padding: .75rem; background: #fff;
 }
-.card:hover { transform: translateY(-2px); box-shadow: 0 12px 22px rgba(0,0,0,.06); border-color: #e5e2df; }
-@media (prefers-reduced-motion: reduce) { .card, .tile { transition: none; } }
-
-.thumb { width: 84px; height: 84px; border-radius: 12px; overflow: hidden; border: 1px solid #eee; display: grid; place-items: center; background: #faf9f8; }
+.thumb {
+  width: 80px; height: 80px; border-radius: 12px; overflow: hidden;
+  border: 1px solid #eee; display: grid; place-items: center;
+}
 .thumb img { width: 100%; height: 100%; object-fit: cover; }
 .ph { font-size: 1.5rem; }
-
 .info { display: grid; gap: .25rem; }
-.name {
-  margin: 0; font-size: 1rem; font-weight: 700;
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-}
-.meta { font-size: .9rem; opacity: .72; }
+.name { margin: 0; font-size: 1rem; font-weight: 700; }
+.meta { font-size: .9rem; opacity: .75; }
 .foot { display: flex; gap: .5rem; align-items: center; margin-top: .25rem; }
 .badge { font-size: .75rem; padding: .15rem .45rem; border: 1px solid #eee; border-radius: 999px; background: #f7f7f9; }
 .rating { font-size: .85rem; }
+
+.err { color: #b00020; }
+.loading, .empty { opacity: .85; }
+
+/* TransitionGroup: fade/slide in + stagger */
+.fadeup-enter-from, .fadeup-appear-from { opacity: 0; transform: translateY(10px); }
+.fadeup-enter-active, .fadeup-appear-active {
+  transition: opacity .45s cubic-bezier(.22,.61,.36,1), transform .45s cubic-bezier(.22,.61,.36,1);
+}
+.fadeup-leave-to { opacity: 0; transform: translateY(-6px); }
+.fadeup-leave-active { transition: opacity .25s ease, transform .25s ease; position: relative; }
+.fadeup-move { transition: transform .3s ease; }
 </style>
