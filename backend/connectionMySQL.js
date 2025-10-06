@@ -12,3 +12,19 @@ const pool = mysql.createPool({
 });
 
 module.exports = pool;
+
+
+// 5. Testfunktion (Valfri, men rekommenderas starkt!)
+async function testDbConnection() {
+  try {
+    const [rows] = await pool.query('SELECT 1 + 1 AS solution');
+    console.log("✅ Databasanslutning lyckades! Svar: ", rows[0].solution);
+  } catch (error) {
+    console.error("❌ Databasanslutning misslyckades: ", error.message);
+    // Stäng servern om anslutningen misslyckas
+    process.exit(1);
+  }
+}
+
+// Kör testet när modulen laddas
+testDbConnection();
