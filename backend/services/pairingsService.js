@@ -1,116 +1,59 @@
 // backend/services/pairingsService.js
-// Loads both pairing datasets (basic + gourmet) and suggests wine ideas for a dish.
-// English-only code/comments, deduped results, and "level" tagging for UI styling.
-
 const fs = require('fs');
 const path = require('path');
 
-// Cache in memory
-let DATA = {
-  basic: [],
-  gourmet: [],
-  merged: [] // [{ dish, level, recommends: [{query, reason}, ...] }]
+let sets = { basic: [], gourmet: [] };
+
+function loadJsonSafe(relPath) {
+    try {
+        const file = path.join(__dirname, '..', relPath);
+        if (fs.existsSync(file)) {
+            const raw = fs.readFileSync(file, 'utf8');
+            return JSON.parse(raw);
+        }
+    } catch (e) {
+        console.warn(`[pairingsService] failed to load ${relPath}:`, e.message);
+    }
+    return [];
+}
+
+async function warmPairings() {
+    const basic = loadJsonSafe('data/pairings-basic.json');     // optional file
+    const gourmet = loadJsonSafe('data/pairings-gourmet.json'); // optional file
+    sets.basic = Array.isArray(basic) ? basic : [];
+    sets.gourmet = Array.isArray(gourmet) ? gourmet : [];
+    console.log(`[pairingsService] loaded: basic=${sets.basic.length}, gourmet=${sets.gourmet.length}`);
+    return sets;
+}
+
+function getSets() {
+    return sets;
+}
+
+function suggestPairings(dish) {
+    const q = (dish || '').toLowerCase().trim();
+    if (!q) return [];
+    const all = [...sets.basic, ...sets.gourmet];
+
+    const matches = all.filter(item => {
+        const hayDish = (item.dish || '').toLowerCase();
+        const hayKeys = (item.keywords || []).join(' ').toLowerCase();
+        return hayDish.includes(q) || hayKeys.includes(q);
+    });
+
+    // light relevance: shorter dish name first, then alpha
+    matches.sort((a, b) => {
+        const al = (a.dish || '').length;
+        const bl = (b.dish || '').length;
+        if (al !== bl) return al - bl;
+        return (a.dish || '').localeCompare(b.dish || '');
+    });
+
+    return matches;
+}
+
+module.exports = {
+    warmPairings,
+    getSets,
+    suggestPairings,
 };
-let loaded = false;
-
-function loadJSON(relPath) {
-  const p = path.resolve(__dirname, '..', 'data', relPath);
-  const raw = fs.readFileSync(p, 'utf8');
-  return JSON.parse(raw);
-}
-
-function loadAll() {
-  const basic = loadJSON('pairings-basic.json').map(row => ({
-    dish: row.dish,
-    level: 'basic',
-    recommends: row.recommends
-  }));
-  const gourmet = loadJSON('pairings-gourmet.json').map(row => ({
-    dish: row.dish,
-    level: 'gourmet',
-    recommends: row.recommends
-  }));
-
-  DATA.basic = basic;
-  DATA.gourmet = gourmet;
-  DATA.merged = [...basic, ...gourmet];
-  loaded = true;
-  console.log(`[pairingsService] loaded: basic=${basic.length}, gourmet=${gourmet.length}`);
-}
-
-// Public: call once on server start (optional)
-function warmPairings() {
-  if (!loaded) loadAll();
-}
-
-// Utility: simple normalize
-function norm(s) {
-  return (s || '').toString().trim().toLowerCase();
-}
-
-/**
- * Suggest pairings for a dish text.
- * Matches:
- *  - exact/substring against gourmet dish names
- *  - exact/substring against basic keywords
- * Returns a flat list of ideas:
- *   [{ query, reason, level, fromDish }]
- */
-function suggestPairings(dishText) {
-  if (!loaded) loadAll();
-
-  const q = norm(dishText);
-  if (!q) return [];
-
-  // Find all rows that match either by dish including query or query including dish
-  const hits = DATA.merged.filter(row => {
-    const dish = norm(row.dish);
-    return dish.includes(q) || q.includes(dish);
-  });
-
-  // If nothing matched, fall back to sensible defaults
-  const rows = hits.length > 0 ? hits : [
-    {
-      dish: 'general',
-      level: 'basic',
-      recommends: [
-        { query: 'Pinot Noir',       reason: 'Versatile light red for many dishes.' },
-        { query: 'Chardonnay',       reason: 'Textural white for creamy/buttery flavors.' },
-        { query: 'Sauvignon Blanc',  reason: 'Crisp white for herbs, salads, seafood.' }
-      ]
-    }
-  ];
-
-  // Flatten, tag with level and source dish, and dedupe by query
-  const seen = new Set();
-  const ideas = [];
-  for (const row of rows) {
-    for (const rec of row.recommends) {
-      const key = norm(rec.query);
-      if (key && !seen.has(key)) {
-        seen.add(key);
-        ideas.push({
-          query: rec.query,
-          reason: rec.reason,
-          level: row.level,
-          fromDish: row.dish
-        });
-      }
-    }
-  }
-  return ideas;
-}
-
-/**
- * Expose all dishes for UI (e.g., autocomplete sections).
- * Returns: { basic: [dish], gourmet: [dish] }
- */
-function listDishes() {
-  if (!loaded) loadAll();
-  return {
-    basic: DATA.basic.map(r => r.dish),
-    gourmet: DATA.gourmet.map(r => r.dish)
-  };
-}
-
-module.exports = { warmPairings, suggestPairings, listDishes };
