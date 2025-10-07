@@ -142,7 +142,7 @@ app.get('/api/db-check', async (_req, res) => {
 
 // Exempel på en skyddad route (Test C)
 app.get('/api/protected', authMiddleware, (req, res) => {
-  res.json({ message: `Welcome, ${req.user.username}! Your ID is: ${req.user.userId}` });
+  res.json({ message: `Welcome, ${req.user.username}! ` });
 });
 
 
