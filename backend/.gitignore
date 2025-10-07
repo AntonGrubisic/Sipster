@@ -1,4 +1,4 @@
-.env
+../.env
 ds_store
 node_modules
 npm-debug.log
