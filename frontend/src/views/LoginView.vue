@@ -2,16 +2,24 @@
   <div class="wrap">
     <SiteHeader />
     <form class="card" @submit.prevent="submit">
+      <h2>Login</h2>
 
       <label>
         Email
-        <input v-model="email" type="email" required />
+        <input v-model="email" type="email" required :disabled="isLoading" />
       </label>
       <label>
         Password
-        <input v-model="password" type="password" required />
+        <input v-model="password" type="password" required :disabled="isLoading" />
       </label>
-      <button class="btn primary" type="submit">Log in</button>
+
+      <!-- FELMEDDELANDE -->
+      <p v-if="error" class="error-message">{{ error }}</p>
+
+      <button class="btn primary" type="submit" :disabled="isLoading">
+        {{ isLoading ? 'Logging In...' : 'Log in' }}
+      </button>
+
       <p class="small">No account? Get one! <router-link to="/register">Signup</router-link></p>
     </form>
   </div>
@@ -19,10 +27,36 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import SiteHeader from '../components/SiteHeader.vue'
-// TODO: koppla till auth.service.js
-const email = ref(''); const password = ref('')
-const submit = () => { /* call login({email,password}) och navigera */ }
+import { loginUser } from '../services/authService' // Importera servicen
+
+const router = useRouter()
+const email = ref('');
+const password = ref('')
+const error = ref(null)
+const isLoading = ref(false)
+
+const submit = async () => {
+  error.value = null; // Rensa gamla fel
+  isLoading.value = true;
+
+  try {
+    const userData = await loginUser(email.value, password.value);
+
+    // Logiken för att spara token (i localStorage) sker inuti authService.js
+    console.log(`Successfully logged in as: ${userData.username}. Token stored.`);
+
+    // Vid lyckad inloggning, skicka användaren till startsidan
+    router.push('/');
+
+  } catch (err) {
+    // Fånga felmeddelandet från backend (t.ex. "Invalid email or password")
+    error.value = err.message;
+  } finally {
+    isLoading.value = false;
+  }
+}
 </script>
 
 <style scoped>
@@ -32,5 +66,20 @@ h2{ margin:0 0 12px; }
 label{ display:block; font-size:14px; margin:12px 0; }
 input{ width:100%; padding:12px; border:1px solid #ddd; border-radius:10px; }
 .btn{ margin-top:10px; width:100%; padding:12px 16px; border-radius:10px; border:none; background:#111; color:#fff; font-weight:600; }
+.btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
 .small{ text-align:center; font-size:13px; color:#666; margin-top:10px; }
+
+.error-message {
+  color: #e03131;
+  background-color: #fcebeb;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  font-size: 14px;
+  border: 1px solid #f99;
+}
 </style>
