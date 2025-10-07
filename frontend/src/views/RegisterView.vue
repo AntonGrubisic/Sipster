@@ -50,12 +50,8 @@ const submit = async () => {
   isLoading.value = true;
 
   try {
-    // FIXEN ÄR HÄR: Skickar ETT objekt ({ email, username, password })
-    await registerUser({
-      email: email.value,
-      username: name.value, // Använder Name som Username
-      password: password.value
-    });
+    // Observera att vi skickar name som username till backend
+    await registerUser(email.value, name.value, password.value);
 
     // Vid lyckad registrering, skicka användaren till inloggningssidan
     router.push('/login');
