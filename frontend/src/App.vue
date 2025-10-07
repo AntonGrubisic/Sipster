@@ -1,10 +1,11 @@
+<!-- frontend/src/App.vue -->
 <template>
-  <SiteHeader />
-
-  <!-- Smooth page change -->
-  <transition name="route-fade" mode="out-in" appear>
-    <router-view />
-  </transition>
+  <div id="app">
+    <SiteHeader />
+    <main class="site-content">
+      <router-view />
+    </main>
+  </div>
 </template>
 
 <script setup>
@@ -19,15 +20,11 @@ body {
   color: #111;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
 }
-
-/* subtle route fade to match the elegant vibe */
-.route-fade-enter-from,
-.route-fade-leave-to {
-  opacity: 0;
-  transform: translateY(6px);
-}
-.route-fade-enter-active,
-.route-fade-leave-active {
-  transition: opacity .28s ease, transform .28s ease;
+.site-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: calc(100vh - 80px);
+  padding-top: 1rem;
 }
 </style>

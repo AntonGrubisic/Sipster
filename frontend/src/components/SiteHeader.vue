@@ -1,95 +1,70 @@
+<!-- frontend/src/components/SiteHeader.vue -->
 <template>
   <header class="site-header">
-    <!-- Logo row -->
-    <div class="bar">
+    <div class="inner">
       <router-link to="/" class="logo-link" aria-label="Go to home">
         <img src="/sipster-logo.png" alt="Sipster" class="logo" />
       </router-link>
+
+      <nav class="nav">
+        <router-link to="/wines" class="nav-item" active-class="active">Wines</router-link>
+        <router-link to="/pairings" class="nav-item" active-class="active">Wine &amp; Dine</router-link>
+        <router-link to="/login" class="nav-item" active-class="active">Login</router-link>
+      </nav>
     </div>
-
-    <!-- Tabs row -->
-    <nav class="tabs" role="navigation" aria-label="Primary">
-      <router-link to="/wines" class="tab" v-slot="{ isActive }">
-        <span :class="['tlabel', { active: isActive }]">Wines</span>
-      </router-link>
-
-      <router-link to="/pairings" class="tab" v-slot="{ isActive }">
-        <span :class="['tlabel', { active: isActive }]">Wine &amp; Dine</span>
-      </router-link>
-    </nav>
   </header>
 </template>
 
 <script setup>
-/* no script needed */
 </script>
 
 <style scoped>
-/* sticky header area */
 .site-header {
   position: sticky;
   top: 0;
-  z-index: 50;
-  backdrop-filter: saturate(1.1) blur(6px);
+  z-index: 100;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  padding: 0.75rem 1.25rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
 }
 
-/* top bar with centered logo */
-.bar {
+.inner {
+  width: min(1100px, 100%);
+  margin: 0 auto;
   display: flex;
-  justify-content: center;
-  padding: 1rem 0.75rem 0.5rem;
-  background: #fff;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .logo-link { display: inline-block; }
-.logo      { width: clamp(120px, 20vw, 200px); height: auto; cursor: pointer; }
+.logo {
+  width: clamp(120px, 18vw, 200px);
+  height: auto;
+  cursor: pointer;
+  transition: transform .2s ease;
+}
+.logo:hover { transform: scale(1.03); }
 
-/* tabs row */
-.tabs {
+.nav {
   display: flex;
-  justify-content: center;
-  gap: 0.75rem;
-  padding: 0.4rem 0.5rem;
-  background: #fff;
-  border-bottom: 1px solid #eee;
+  gap: 1.1rem;
 }
-
-.tab {
+.nav-item {
   text-decoration: none;
-  padding: 0.35rem 0.5rem;
-  border-radius: 10px;
-  transition: background .15s ease, transform .05s ease;
-}
-.tab:hover { background: #f8f6f4; }
-
-.tlabel {
-  display: inline-block;
-  padding: 0.45rem 0.9rem;
-  border-radius: 999px;
+  color: #3a2c28;
   font-weight: 600;
-  color: #2d2623;
-  position: relative;
+  font-size: 0.98rem;
+  padding-bottom: 4px;
+  border-bottom: 2px solid transparent;
+  transition: color .2s ease, border-color .2s ease;
 }
-
-/* active underline (elegant gradient), plus subtle weight/opacity */
-.tlabel.active {
-  color: #241d1a;
+.nav-item:hover {
+  color: #7b1113;
+  border-bottom-color: #bca897;
 }
-.tlabel.active::after {
-  content: "";
-  position: absolute;
-  left: 14px;
-  right: 14px;
-  bottom: -6px;
-  height: 3px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #bca897, #7b1113);
-  opacity: .9;
-}
-
-/* mobile: keep spacing nice and airy */
-@media (max-width: 560px) {
-  .tabs { gap: 0.25rem; }
-  .tlabel { padding: 0.42rem 0.75rem; }
+.nav-item.active {
+  color: #7b1113;
+  border-bottom-color: #7b1113;
 }
 </style>
