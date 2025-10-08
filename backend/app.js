@@ -85,6 +85,7 @@ app.post('/api/users/login', async (req, res) => {
 
     const user = users[0];
 
+
     if (!user) {
       return res.status(401).json({ error: 'Invalid email or password.' });
     }
