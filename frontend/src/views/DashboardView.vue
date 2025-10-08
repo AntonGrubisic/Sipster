@@ -1,6 +1,5 @@
 <template>
   <div class="wrap">
-    <!-- TOPBAR: logo (vänster), search (mitten), profile (höger) -->
     <header class="topbar">
       <router-link to="/" class="brand" aria-label="Sipster home">
         <img src="/sipster-logo.png" alt="Sipster" class="logo"/>
@@ -37,7 +36,7 @@
       <router-link class="tab" to="/pairings" :class="{ active: isActive('/pairings') }">Pairings</router-link>
     </nav>
 
-    <!-- Hårdkodade viner -->
+
     <main class="content">
       <h2>Recommended Wines</h2>
       <section class="grid">
@@ -62,7 +61,6 @@ const router = useRouter()
 const route = useRoute()
 const q = ref('')
 
-// Hårdkodade viner – lägg bilder i /public/wines/
 const wines = ref([
   {
     id: 1,
@@ -121,7 +119,7 @@ function goSearch() {
   padding: 16px;
 }
 
-/* TOPBAR: 3 kolumner i samma rad */
+
 .topbar {
   width: 100%;
   max-width: 1180px;
@@ -132,9 +130,9 @@ function goSearch() {
   margin-bottom: 14px;
 }
 
-/* Större logo */
+
 .logo {
-  height: 90px; /* justera vid behov */
+  height: 120px;
   width: auto;
   display: block;
 }
@@ -178,7 +176,7 @@ function goSearch() {
   background: #f7f7f7;
 }
 
-/* Profilknapp */
+
 .profile {
   justify-self: end;
   display: inline-flex;
@@ -197,7 +195,7 @@ function goSearch() {
   background: #f7f7f7;
 }
 
-/* Menyflikar */
+
 .tabs {
   width: 100%;
   max-width: 1180px;
@@ -231,7 +229,7 @@ function goSearch() {
   border-radius: 2px;
 }
 
-/* Innehåll och hårdkodade vin-kort */
+
 .content {
   width: 100%;
   max-width: 1180px;
@@ -297,7 +295,7 @@ function goSearch() {
   margin: 0 10px 12px;
 }
 
-/* Responsivt: dölj profiltext på små skärmar */
+
 @media (max-width: 720px) {
   .profile span {
     display: none;

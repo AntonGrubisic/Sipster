@@ -40,11 +40,11 @@
       <router-link class="tab" to="/pairings" :class="{ active: isActive('/pairings') }">Pairings</router-link>
     </nav>
 
-    <!-- Recommended Wines (endast grid, ingen box runt) -->
+    <!-- Recommended Wines -->
     <main class="content">
       <h2 class="cards-title">Recommended Wines</h2>
       <div class="grid">
-        <article v-for="w in wines" :key="w.id" class="card" tabindex="0">
+        <article v-for="w in wines" :key="w.id" class="card" >
           <div class="imgbox">
             <img :src="w.image" :alt="w.name"/>
           </div>
@@ -84,7 +84,7 @@ function handleLogout() {
   router.push('/login')
 }
 
-// Dummy-data (lägg bilder i /public/wines/)
+// Dummy-data
 const wines = ref([
   { id: 1, image: '/wines/1.jpg', producer: 'Terre di Mario', name: 'Terre di Mario', region: 'Abruzzo', country: 'Italy' },
   { id: 2, image: '/wines/2.jpg', producer: 'Torre il Ceretto', name: 'Borgo la Piaggia', region: 'Toscana', country: 'Italy' },
@@ -95,7 +95,7 @@ const wines = ref([
 
 onMounted(() => {
   if (isAuthenticated.value) {
-    getProtectedData().catch(() => {}) // valfritt om du vill hämta meddelande
+    getProtectedData().catch(() => {})
   }
 })
 </script>
