@@ -1,0 +1,178 @@
+Index: frontend/src/views/WineSearchView.vue
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><template>\n  <main class=\"page\">\n    <h1>Wine Search</h1>\n    <WineSearch/>\n  </main>\n</template>\n\n<script setup>\nimport WineSearch from '../components/WineSearch.vue'\n</script>\n\n<style scoped>\n.page {\n  padding: 1rem;\n  max-width: 720px;\n  margin: 0 auto;\n}\n\nh1 {\n  font-size: 1.25rem;\n  margin-bottom: 0.75rem;\n}\n</style>\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/frontend/src/views/WineSearchView.vue b/frontend/src/views/WineSearchView.vue
+--- a/frontend/src/views/WineSearchView.vue	(revision 7b21d04e5c408c3b452326d936867e1d1c667e8a)
++++ b/frontend/src/views/WineSearchView.vue	(date 1760357694955)
+@@ -1,23 +1,42 @@
+ <template>
+-  <main class="page">
++  <div class="page">
+     <h1>Wine Search</h1>
+-    <WineSearch/>
+-  </main>
++    <p>Explore and discover wines that match your taste.</p>
++  </div>
+ </template>
+ 
+ <script setup>
+-import WineSearch from '../components/WineSearch.vue'
++// You can keep your existing logic here if you already had one
+ </script>
+ 
+ <style scoped>
+ .page {
+-  padding: 1rem;
+-  max-width: 720px;
+-  margin: 0 auto;
++  min-height: 100vh;
++  padding: 2rem 1rem 3rem;
++  display: grid;
++  gap: 1.25rem;
++  justify-content: center;
++  text-align: center;
++
++  /* 🍷 Elegant vinröd bakgrund med textur */
++  background-color: #7b1113;
++  background-image: url('/textures/wine-texture.jpg');
++  background-size: cover;
++  background-position: center;
++  background-repeat: no-repeat;
++  color: #fff;
+ }
+ 
+-h1 {
+-  font-size: 1.25rem;
+-  margin-bottom: 0.75rem;
++.card {
++  background: rgba(255, 255, 255, 0.1);
++  backdrop-filter: blur(8px);
++  border-radius: 12px;
++  padding: 1rem 1.5rem;
++  transition: all 0.25s ease;
++}
++
++.card:hover {
++  transform: translateY(-4px);
++  background: rgba(255, 255, 255, 0.15);
+ }
+ </style>
+Index: .idea/misc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<project version=\"4\">\n  <component name=\"ProjectRootManager\" version=\"2\" languageLevel=\"JDK_22\" project-jdk-name=\"openjdk-24\" project-jdk-type=\"JavaSDK\">\n    <output url=\"file://$PROJECT_DIR$/out\" />\n  </component>\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/misc.xml b/.idea/misc.xml
+--- a/.idea/misc.xml	(revision 7b21d04e5c408c3b452326d936867e1d1c667e8a)
++++ b/.idea/misc.xml	(date 1760356300913)
+@@ -1,6 +1,14 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
+-  <component name="ProjectRootManager" version="2" languageLevel="JDK_22" project-jdk-name="openjdk-24" project-jdk-type="JavaSDK">
++  <component name="ExternalStorageConfigurationManager" enabled="true" />
++  <component name="MavenProjectsManager">
++    <option name="originalFiles">
++      <list>
++        <option value="$PROJECT_DIR$/pom.xml" />
++      </list>
++    </option>
++  </component>
++  <component name="ProjectRootManager" version="2" languageLevel="JDK_24" default="true" project-jdk-name="openjdk-24" project-jdk-type="JavaSDK">
+     <output url="file://$PROJECT_DIR$/out" />
+   </component>
+ </project>
+\ No newline at end of file
+Index: .idea/jarRepositories.xml
+===================================================================
+diff --git a/.idea/jarRepositories.xml b/.idea/jarRepositories.xml
+new file mode 100644
+--- /dev/null	(date 1760356261399)
++++ b/.idea/jarRepositories.xml	(date 1760356261399)
+@@ -0,0 +1,20 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="RemoteRepositoriesConfiguration">
++    <remote-repository>
++      <option name="id" value="central" />
++      <option name="name" value="Central Repository" />
++      <option name="url" value="https://repo.maven.apache.org/maven2" />
++    </remote-repository>
++    <remote-repository>
++      <option name="id" value="central" />
++      <option name="name" value="Maven Central repository" />
++      <option name="url" value="https://repo1.maven.org/maven2" />
++    </remote-repository>
++    <remote-repository>
++      <option name="id" value="jboss.community" />
++      <option name="name" value="JBoss Community repository" />
++      <option name="url" value="https://repository.jboss.org/nexus/content/repositories/public/" />
++    </remote-repository>
++  </component>
++</project>
+\ No newline at end of file
+Index: .idea/compiler.xml
+===================================================================
+diff --git a/.idea/compiler.xml b/.idea/compiler.xml
+new file mode 100644
+--- /dev/null	(date 1760356261390)
++++ b/.idea/compiler.xml	(date 1760356261390)
+@@ -0,0 +1,13 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="CompilerConfiguration">
++    <annotationProcessing>
++      <profile name="Maven default annotation processors profile" enabled="true">
++        <sourceOutputDir name="target/generated-sources/annotations" />
++        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
++        <outputRelativeToContentRoot value="true" />
++        <module name="Sipster" />
++      </profile>
++    </annotationProcessing>
++  </component>
++</project>
+\ No newline at end of file
+Index: .idea/vcs.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<project version=\"4\">\n  <component name=\"VcsDirectoryMappings\">\n    <mapping directory=\"\" vcs=\"Git\" />\n  </component>\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/vcs.xml b/.idea/vcs.xml
+--- a/.idea/vcs.xml	(revision 7b21d04e5c408c3b452326d936867e1d1c667e8a)
++++ b/.idea/vcs.xml	(date 1760356300950)
+@@ -1,6 +1,6 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
+   <component name="VcsDirectoryMappings">
+-    <mapping directory="" vcs="Git" />
++    <mapping directory="$PROJECT_DIR$" vcs="Git" />
+   </component>
+ </project>
+\ No newline at end of file
+Index: pom.xml
+===================================================================
+diff --git a/pom.xml b/pom.xml
+new file mode 100644
+--- /dev/null	(date 1760356300944)
++++ b/pom.xml	(date 1760356300944)
+@@ -0,0 +1,12 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project xmlns="http://maven.apache.org/POM/4.0.0"
++         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
++         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
++    <modelVersion>4.0.0</modelVersion>
++
++    <groupId>se.iths.java24</groupId>
++    <artifactId>Sipster</artifactId>
++    <version>1.0-SNAPSHOT</version>
++
++
++</project>
+\ No newline at end of file

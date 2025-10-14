@@ -64,37 +64,50 @@
 
     <!-- 🍷 Results grid -->
     <section v-if="wines.length" class="grid" aria-live="polite">
-      <TransitionGroup name="fadeup" tag="div" class="grid-inner" appear>
-        <article
-            v-for="(w, idx) in wines"
-            :key="w.id"
-            class="card"
-            :style="{ transitionDelay: (idx * 30) + 'ms' }"
+      <TransitionGroup name="fadeup" tag="div" appear>
+        <div
+            v-for="(countryWines, country) in groupedWines"
+            :key="country"
+            class="country-section"
         >
-          <div class="thumb">
-            <img v-if="w.image" :src="w.image" alt="" />
-            <div v-else class="ph">🍷</div>
+          <h2 class="country-title">{{ country }}</h2>
+
+          <!-- ✅ Lagt vinerna i en grid som matchar layouten på din bild -->
+          <div class="grid-inner">
+            <article
+                v-for="(w, idx) in countryWines"
+                :key="w.id"
+                class="card"
+                :style="{ transitionDelay: (idx * 30) + 'ms' }"
+            >
+              <div class="thumb">
+                <img v-if="w.image" :src="w.image" alt=""/>
+                <div v-else class="ph">🍷</div>
+              </div>
+              <div class="info">
+                <h3 class="name">{{ w.name }}</h3>
+                <div class="meta">
+                  <span v-if="w.grape">{{ w.grape }}</span>
+                  <span v-if="w.winery"> • {{ w.winery }}</span>
+                  <span v-if="w.location"> • {{ w.location }}</span>
+                </div>
+                <div class="foot">
+                  <span class="badge">{{ labelFor(w.style) }}</span>
+                  <span v-if="w.rating" class="rating">★ {{ w.rating }}</span>
+                </div>
+              </div>
+            </article>
           </div>
-          <div class="info">
-            <h3 class="name">{{ w.name }}</h3>
-            <div class="meta">
-              <span v-if="w.grape">{{ w.grape }}</span>
-              <span v-if="w.winery"> • {{ w.winery }}</span>
-              <span v-if="w.location"> • {{ w.location }}</span>
-            </div>
-            <div class="foot">
-              <span class="badge">{{ labelFor(w.style) }}</span>
-              <span v-if="w.rating" class="rating">★ {{ w.rating }}</span>
-            </div>
-          </div>
-        </article>
+        </div>
       </TransitionGroup>
     </section>
+
+
   </main>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, nextTick } from 'vue'
+import { ref, reactive, onMounted, nextTick, computed } from 'vue'
 
 const CATS = [
   { key: 'reds', label: 'Red' },
@@ -153,11 +166,39 @@ function onTileLeave(i) {
 function displayName(w) {
   return (w.name || w.wine || '').toString()
 }
+
 function sortByName(arr) {
-  return (arr || []).slice().sort((a, b) =>
-      displayName(a).localeCompare(displayName(b), undefined, { sensitivity: 'base' })
-  )
+  return (arr || []).slice().sort((a, b) => {
+    const countryA = (a.location || '').toLowerCase()
+    const countryB = (b.location || '').toLowerCase()
+    const nameA = displayName(a)
+    const nameB = displayName(b)
+
+    if (countryA < countryB) return -1
+    if (countryA > countryB) return 1
+    return nameA.localeCompare(nameB, undefined, { sensitivity: 'base' })
+  })
 }
+
+// --- Computed: group wines per country ---
+const groupedWines = computed(() => {
+  const groups = {}
+  for (const wine of wines.value) {
+    const country = (wine.location || 'Unknown Country').trim()
+    if (!groups[country]) groups[country] = []
+    groups[country].push(wine)
+  }
+  // Sortera länder i alfabetisk ordning
+  const sorted = {}
+  Object.keys(groups)
+      .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
+      .forEach(key => {
+        sorted[key] = groups[key].sort((a, b) =>
+            displayName(a).localeCompare(displayName(b), undefined, { sensitivity: 'base' })
+        )
+      })
+  return sorted
+})
 
 function labelFor(styleKey) {
   const f = CATS.find(c => c.key === styleKey)
@@ -218,7 +259,11 @@ onMounted(() => {
 </script>
 
 <style scoped>
-[v-cloak] { opacity: 0; }
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700;900&display=swap');
+
+[v-cloak] {
+  opacity: 0;
+}
 
 /* Page + hero base */
 .page {
@@ -228,7 +273,16 @@ onMounted(() => {
   gap: 1.5rem;
   justify-content: center;
   text-align: center;
-  background: #faf8f6;
+  font-family: 'Playfair Display', serif;
+
+  /* 🌿 Elegant green background with subtle texture */
+  background-color: #e8f0e5; /* fallback if image fails */
+  background-image: url('/textures/green-fabric.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  color: #1a1a1a;
 }
 
 /* Hero fade-in */
@@ -240,9 +294,16 @@ onMounted(() => {
   animation: heroFade 700ms ease-out both;
   animation-delay: 60ms;
 }
+
 @keyframes heroFade {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .hero h1 {
@@ -251,23 +312,28 @@ onMounted(() => {
   font-size: clamp(2.2rem, 4.2vw, 3.2rem);
   letter-spacing: -0.02em;
   line-height: 1.05;
-  color: #3a2c28;
+  color: #f5f5f0;
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.4);
 }
+
 .hero h1::after {
   content: "";
   display: block;
-  width: 84px; height: 3px;
+  width: 84px;
+  height: 3px;
   margin: 0.9rem auto 0;
   border-radius: 999px;
   background: linear-gradient(90deg, #bca897, #7b1113);
   opacity: 0.85;
 }
+
 .sub {
   margin: 0.9rem auto 0;
   max-width: 720px;
   font-size: clamp(0.98rem, 1.4vw, 1.05rem);
   line-height: 1.55;
-  color: #5a4a45;
+  color: #e0e0dc;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
   opacity: 0.85;
 }
 
@@ -280,6 +346,7 @@ onMounted(() => {
   flex-wrap: wrap;
   margin-top: 0.25rem;
 }
+
 .search {
   display: flex;
   align-items: center;
@@ -290,6 +357,7 @@ onMounted(() => {
   border-radius: 12px;
   padding: 0.35rem 0.6rem;
 }
+
 .search input {
   flex: 1;
   border: none;
@@ -299,7 +367,11 @@ onMounted(() => {
   color: #3a2c28;
   padding: 0.35rem 0.25rem;
 }
-.search input::placeholder { color: #9b8f88; }
+
+.search input::placeholder {
+  color: #9b8f88;
+}
+
 .search-btn {
   background: #7b1113;
   color: #fff;
@@ -311,11 +383,22 @@ onMounted(() => {
   cursor: pointer;
   transition: background 0.2s ease, transform 0.1s ease;
 }
-.search-btn:hover { background: #92171a; transform: translateY(-1px); }
-.search-btn:active { transform: translateY(0); }
+
+.search-btn:hover {
+  background: #92171a;
+  transform: translateY(-1px);
+}
+
+.search-btn:active {
+  transform: translateY(0);
+}
 
 /* Tiles */
-.tiles { display: flex; justify-content: center; }
+.tiles {
+  display: flex;
+  justify-content: center;
+}
+
 .tiles-inner {
   display: flex;
   justify-content: center;
@@ -323,63 +406,194 @@ onMounted(() => {
   gap: 1.25rem;
   padding: 0 0.5rem;
 }
+
 .tile {
-  border: none; border-radius: 20px; background: none; cursor: pointer;
-  width: 180px; height: 240px; overflow: hidden; position: relative;
-  transition: transform 0.25s ease, box-shadow 0.25s ease; will-change: transform;
+  border: none;
+  border-radius: 20px;
+  background: none;
+  cursor: pointer;
+  width: 180px;
+  height: 240px;
+  overflow: hidden;
+  position: relative;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  will-change: transform;
 }
-.tile:hover { transform: translateY(-6px); }
+
+.tile:hover {
+  transform: translateY(-6px);
+}
+
 .image-wrap {
-  width: 100%; height: 100%; position: relative; border-radius: 20px; overflow: hidden;
-  box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+  width: 100%;
+  height: 100%;
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
 }
+
 .tile-img {
-  width: 100%; height: 100%; object-fit: cover;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   transition: transform 300ms ease, filter 300ms ease;
 }
+
 .overlay {
-  position: absolute; inset: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.5), rgba(0,0,0,0.08));
-  display: flex; align-items: flex-end; justify-content: center;
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.08));
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
   transition: opacity 250ms ease, transform 250ms ease;
   opacity: 0;
 }
-.tile:hover .overlay { opacity: 1; }
-.label { color: #fff; font-weight: 700; font-size: 1.1rem; padding-bottom: 0.9rem; }
+
+.tile:hover .overlay {
+  opacity: 1;
+}
+
+.label {
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.1rem;
+  padding-bottom: 0.9rem;
+}
 
 /* Results */
-.grid { display: grid; }
+.grid {
+  display: grid;
+}
+
+.country-section {
+  margin-top: 2.2rem;
+}
+
+.country-title {
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: #f5f5f5; /* ljus text mot mörk bakgrund */
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6); /* gör texten mer läsbar */
+  margin: 2.5rem 0 1.2rem;
+  letter-spacing: 0.5px;
+  font-family: 'Playfair Display', serif;
+  display: inline-block;
+  padding-bottom: 0.35rem;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.4); /* diskret vit underline */
+}
+
+
+.country-section + .country-section {
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  padding-top: 1.5rem;
+}
+
+
+
 .grid-inner {
   display: grid;
   gap: 1rem;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  justify-content: center;
 }
-.card {
-  display: grid; grid-template-columns: 80px 1fr; gap: .75rem;
-  border: 1px solid #eee; border-radius: 16px; padding: .75rem; background: #fff;
-}
-.thumb {
-  width: 80px; height: 80px; border-radius: 12px; overflow: hidden;
-  border: 1px solid #eee; display: grid; place-items: center;
-}
-.thumb img { width: 100%; height: 100%; object-fit: cover; }
-.ph { font-size: 1.5rem; }
-.info { display: grid; gap: .25rem; }
-.name { margin: 0; font-size: 1rem; font-weight: 700; }
-.meta { font-size: .9rem; opacity: .75; }
-.foot { display: flex; gap: .5rem; align-items: center; margin-top: .25rem; }
-.badge { font-size: .75rem; padding: .15rem .45rem; border: 1px solid #eee; border-radius: 999px; background: #f7f7f9; }
-.rating { font-size: .85rem; }
 
-.err { color: #b00020; }
-.loading, .empty { opacity: .85; }
+
+.card {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: .75rem;
+  border: 1px solid #eee;
+  border-radius: 16px;
+  padding: .75rem;
+  background: #fff;
+}
+
+.thumb {
+  width: 80px;
+  height: 80px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #eee;
+  display: grid;
+  place-items: center;
+}
+
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ph {
+  font-size: 1.5rem;
+}
+
+.info {
+  display: grid;
+  gap: .25rem;
+}
+
+.name {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.meta {
+  font-size: .9rem;
+  opacity: .75;
+}
+
+.foot {
+  display: flex;
+  gap: .5rem;
+  align-items: center;
+  margin-top: .25rem;
+}
+
+.badge {
+  font-size: .75rem;
+  padding: .15rem .45rem;
+  border: 1px solid #eee;
+  border-radius: 999px;
+  background: #f7f7f9;
+}
+
+.rating {
+  font-size: .85rem;
+}
+
+.err {
+  color: #b00020;
+}
+
+.loading, .empty {
+  opacity: .85;
+}
 
 /* TransitionGroup: fade/slide in + stagger */
-.fadeup-enter-from, .fadeup-appear-from { opacity: 0; transform: translateY(10px); }
-.fadeup-enter-active, .fadeup-appear-active {
-  transition: opacity .45s cubic-bezier(.22,.61,.36,1), transform .45s cubic-bezier(.22,.61,.36,1);
+.fadeup-enter-from, .fadeup-appear-from {
+  opacity: 0;
+  transform: translateY(10px);
 }
-.fadeup-leave-to { opacity: 0; transform: translateY(-6px); }
-.fadeup-leave-active { transition: opacity .25s ease, transform .25s ease; position: relative; }
-.fadeup-move { transition: transform .3s ease; }
+
+.fadeup-enter-active, .fadeup-appear-active {
+  transition: opacity .45s cubic-bezier(.22, .61, .36, 1), transform .45s cubic-bezier(.22, .61, .36, 1);
+}
+
+.fadeup-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
+.fadeup-leave-active {
+  transition: opacity .25s ease, transform .25s ease;
+  position: relative;
+}
+
+.fadeup-move {
+  transition: transform .3s ease;
+}
 </style>
