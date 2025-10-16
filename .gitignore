@@ -3,3 +3,7 @@ node_modules
 npm-debug.log
 .DS_Store
 dist/
+.idea/
+.idea/dataSources/
+.idea/shelf/
+.idea/workspace.xml
