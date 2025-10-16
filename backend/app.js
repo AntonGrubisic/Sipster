@@ -124,26 +124,125 @@ app.post('/api/users/login', async (req, res) => {
 
 
 // **********************************************
-// ** GENERELLA & SKYDDADE ROUTES **
+// ** USER PROFILE & FAVORITES ROUTES **
 // **********************************************
 
-// Enkelt hälsotest (ej skyddad)
-app.get('/api/health', (_req, res) => res.json({ ok: true }));
-
-// Snabbt databastest (ej skyddad)
-app.get('/api/db-check', async (_req, res) => {
+// GET /api/users/profile - Hämta inloggad användares data (US3)
+app.get('/api/users/profile', authMiddleware, async (req, res) => {
+  const userId = req.user.userId;
   try {
-    const [rows] = await pool.query('SELECT 1 AS ok');
-    res.json(rows[0]); // { ok: 1 }
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'DB connection failed' });
+    // Hämta endast icke-känslig data (inte lösenordshash)
+    const [users] = await pool.query('SELECT id, email, username FROM users WHERE id = ?', [userId]);
+    if (!users.length) {
+      return res.status(404).json({ error: 'User not found.' });
+    }
+    res.json(users[0]);
+  } catch (error) {
+    console.error('Profile fetch error:', error.message);
+    res.status(500).json({ error: 'Could not fetch user profile.' });
   }
+});
+
+// GET /api/users/favorites - Hämta alla favoriter för inloggad användare (US8)
+app.get('/api/users/favorites', authMiddleware, async (req, res) => {
+  const userId = req.user.userId;
+  try {
+    // Denna fråga hämtar ENDAST de externa ID:n från vår lokala 'products' tabell.
+    const sql = `
+      SELECT p.external_product_id AS wineId
+      FROM favorites f
+             JOIN products p ON f.product_id = p.id
+      WHERE f.user_id = ?
+    `;
+    const [favorites] = await pool.query(sql, [userId]);
+    // Returnera bara en array av ID-strängar (t.ex. ['VIN1001', 'VIN1003'])
+    res.json(favorites.map(f => f.wineId));
+  } catch (error) {
+    console.error('Favorite fetch error:', error.message);
+    res.status(500).json({ error: 'Could not fetch favorites.' });
+  }
+});
+
+
+// POST /api/users/favorites/:externalWineId - Spara favorit (US7)
+app.post('/api/users/favorites/:externalWineId', authMiddleware, async (req, res) => {
+  const userId = req.user.userId;
+  const externalWineId = req.params.externalWineId; // T.ex. 'VIN1001'
+
+  try {
+    // 1. Hitta eller skapa referens i vår 'products' tabell
+    let [product] = await pool.query('SELECT id FROM products WHERE external_product_id = ?', [externalWineId]);
+    let productId;
+
+    if (product.length === 0) {
+      // Om ID:t från Vin-API:et inte finns, lägg till det
+      const [result] = await pool.query('INSERT INTO products (external_product_id) VALUES (?)', [externalWineId]);
+      productId = result.insertId;
+    } else {
+      productId = product[0].id;
+    }
+
+    // 2. Kontrollera om favoriten redan är sparad (för att undvika fel)
+    const [existing] = await pool.query('SELECT id FROM favorites WHERE user_id = ? AND product_id = ?', [userId, productId]);
+
+    if (existing.length) {
+      return res.status(409).json({ message: 'Wine is already a favorite.' });
+    }
+
+    // 3. Spara favoriten i kopplings-tabellen
+    const sql = 'INSERT INTO favorites (user_id, product_id) VALUES (?, ?)';
+    await pool.query(sql, [userId, productId]);
+    res.status(201).json({ message: 'Favorite saved successfully.' });
+
+  } catch (error) {
+    console.error('Save favorite error:', error.message);
+    res.status(500).json({ error: 'Could not save favorite.' });
+  }
+});
+
+// DELETE /api/users/favorites/:externalWineId - Ta bort favorit
+app.delete('/api/users/favorites/:externalWineId', authMiddleware, async (req, res) => {
+  const userId = req.user.userId;
+  const externalWineId = req.params.externalWineId; // T.ex. 'VIN1001'
+
+  try {
+    // 1. Hitta det lokala product_id baserat på externa ID:t
+    const [product] = await pool.query('SELECT id FROM products WHERE external_product_id = ?', [externalWineId]);
+
+    if (product.length === 0) {
+      // Produkten finns inte i vår referens-tabell (det är okej)
+      return res.status(404).json({ error: 'Favorite not found.' });
+    }
+    const productId = product[0].id;
+
+    // 2. Utför raderingen
+    const [result] = await pool.query('DELETE FROM favorites WHERE user_id = ? AND product_id = ?', [userId, productId]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Favorite not found or already deleted.' });
+    }
+    res.status(200).json({ message: 'Favorite deleted successfully.' });
+
+  } catch (error) {
+    console.error('Delete favorite error:', error.message);
+    res.status(500).json({ error: 'Could not delete favorite.' });
+  }
+});
+
+
+// **********************************************
+// ** PUBLIKA OCH HÄLSA ROUTES **
+// **********************************************
+
+// GET /api/wines - Publik vinlista (US4)
+app.get('/api/wines', async (_req, res) => {
+  // Denna route ska anropa det externa Vin-API:et i framtiden.
+  res.status(501).json({ message: 'Wine API integration is not implemented yet. External API call needed.' });
 });
 
 // Exempel på en skyddad route (Test C)
 app.get('/api/protected', authMiddleware, (req, res) => {
-  res.json({ message: `Welcome, ${req.user.username}! ` });
+  res.json({ message: `Welcome, ${req.user.username}! You are successfully authenticated.` });
 });
 
 
