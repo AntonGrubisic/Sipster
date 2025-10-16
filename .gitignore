@@ -1,11 +1,10 @@
+# miljö / loggar
 .env
-node_modules
 npm-debug.log
 .DS_Store
 dist/
+node_modules/
+
+# IntelliJ / JetBrains
 .idea/
-.idea/misc.xml
-.idea/dataSources
-.idea/dataSources.xml
-.idea/modules.xml
-Sipster.iml
+*.iml
