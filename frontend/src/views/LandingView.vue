@@ -1,74 +1,187 @@
 <template>
-  <div class="wrap">
-    <img src="/sipster-logo.png" alt="Sipster" class="logo" />
+  <div class="page">
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <router-link to="/" class="brand" aria-label="Sipster home">
+        <img src="/sipster-logo.png" alt="Sipster" class="logo"/>
+      </router-link>
 
-    <p class="tagline">A clean, minimal wine guide. Sign in to get started.</p>
+      <div class="search">
+        <input
+            type="search"
+            v-model.trim="q"
+            placeholder="Search wines…"
+            aria-label="Search wines"
+            @keyup.enter="goSearch"
+        />
+        <button class="search-btn" aria-label="Search" @click="goSearch">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+            <path d="M21 21l-4.3-4.3M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z"
+                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
 
-    <nav class="cta" aria-label="primary">
-      <router-link to="/login" class="btn primary">Login</router-link>
-      <router-link to="/register" class="btn ghost">Signup</router-link>
+      <!-- AUTH-ACTIONS -->
+      <div class="auth-actions">
+        <template v-if="!isAuthenticated">
+          <router-link to="/login" class="btn tiny primary">Login</router-link>
+          <router-link to="/register" class="btn tiny ghost">Signup</router-link>
+        </template>
+        <template v-else>
+          <button @click="handleLogout" class="btn tiny primary">Logout</button>
+        </template>
+      </div>
+    </header>
+
+    <!-- MENY -->
+    <nav class="tabs" aria-label="Main menu">
+      <router-link class="tab" to="/wines" :class="{ active: isActive('/wines') }">Wines</router-link>
+      <router-link class="tab" to="/pairings" :class="{ active: isActive('/pairings') }">Pairings</router-link>
     </nav>
+
+    <!-- Recommended Wines -->
+    <main class="content">
+      <h2 class="cards-title">Recommended Wines</h2>
+      <div class="grid">
+        <article v-for="w in wines" :key="w.id" class="card" >
+          <div class="imgbox">
+            <img :src="w.image" :alt="w.name"/>
+          </div>
+          <div class="body">
+            <h3 class="name">{{ w.producer }}</h3>
+            <p class="title">{{ w.name }}</p>
+            <p class="meta">{{ w.region }}, {{ w.country }}</p>
+          </div>
+        </article>
+      </div>
+    </main>
   </div>
 </template>
 
+<script setup>
+import { ref, onMounted, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { getProtectedData, logoutUser } from '@/services/authService'
+
+const router = useRouter()
+const route = useRoute()
+
+// Sök
+const q = ref('')
+function goSearch() {
+  const query = q.value.trim()
+  router.push({ path: '/wines', query: query ? { q: query } : undefined })
+}
+function isActive(prefix) {
+  return route.path.startsWith(prefix)
+}
+
+// Auth
+const isAuthenticated = computed(() => !!localStorage.getItem('userToken'))
+function handleLogout() {
+  logoutUser()
+  router.push('/login')
+}
+
+// Dummy-data
+const wines = ref([
+  { id: 1, image: '/wines/1.jpg', producer: 'Terre di Mario', name: 'Terre di Mario', region: 'Abruzzo', country: 'Italy' },
+  { id: 2, image: '/wines/2.jpg', producer: 'Torre il Ceretto', name: 'Borgo la Piaggia', region: 'Toscana', country: 'Italy' },
+  { id: 3, image: '/wines/3.jpg', producer: 'Casa Ermelinda Freitas', name: 'Fat Baron', region: 'Setúbal', country: 'Portugal' },
+  { id: 4, image: '/wines/4.jpg', producer: 'Arnaldo Rivera', name: 'Barolo Undicicomuni 2016', region: 'Piemonte', country: 'Italy' },
+  { id: 5, image: '/wines/5.jpg', producer: 'Famille Bougrier', name: "L'Artiste Pinot Noir 2024", region: 'Vin De France', country: 'France' },
+])
+
+onMounted(() => {
+  if (isAuthenticated.value) {
+    getProtectedData().catch(() => {})
+  }
+})
+</script>
+
 <style scoped>
-.wrap{
+.page{
   min-height: 100svh;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  text-align: center;
-  padding: 10vh 1rem 1rem;
-  gap: 0;
-  background: #fff;
+  background:
+      radial-gradient(1200px 500px at 10% -10%, #ffe8f0 0%, transparent 45%),
+      radial-gradient(1200px 500px at 90% -10%, #fff3d6 0%, transparent 45%),
+      linear-gradient(180deg, #ffffff, #f9fafb);
   color: #111;
+  padding: 18px;
 }
 
-.logo {
-  width: clamp(260px, 28vw, 360px);
-  height: auto;
-  opacity: 0;
-  animation: fadeIn 1.2s ease forwards;
-  transition: transform 0.25s ease;
+/* ===== Topbar ===== */
+.topbar{
+  width: 100%;
+  max-width: 1200px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 16px;
+}
+.logo{ height: 72px; width:auto; }
+
+.search{
+  display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center;
+}
+.search input{
+  width:100%; padding:12px 14px;
+  border:1px solid #ddd; border-radius:999px;
+}
+.search-btn{
+  border:1px solid #ddd; border-radius:999px; background:#fff;
+  padding:9px 12px; cursor:pointer;
 }
 
-.logo:hover {
-  transform: scale(1.08);
-}
-
-@keyframes fadeIn {
-  to { opacity: 1; }
-}
-
-.tagline{
-  margin: 0 0 clamp(12px, 2.5vw, 18px);
-  color: #555;
-  font-size: clamp(14px, 2.5vw, 16px);
-}
-
-.cta{
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: clamp(10px, 2.5vw, 16px);
-  margin-top: 0.6rem;
-}
-
+.auth-actions{ display:flex; gap:8px; justify-self:end; align-items:center; }
 .btn{
-  text-decoration: none;
-  padding: 0.8em 1.6em;
-  border-radius: 12px;
-  font-weight: 600;
-  min-width: clamp(140px, 35vw, 200px);
-  text-align: center;
-  transition: transform .06s ease, background-color .15s ease, opacity .15s ease;
+  text-decoration:none; padding:.6em 1em; border-radius:12px; font-weight:600;
 }
-.btn:active{ transform: translateY(1px); }
-
-.primary{ background:#111; color:#fff; }
-.primary:hover{ opacity:.92; }
-
+.btn.tiny{ font-size:.9rem; }
+.primary{ background:#111; color:#fff; border:2px solid #111; }
 .ghost{ background:#fff; color:#111; border:1px solid #ddd; }
-.ghost:hover{ background:#f7f7f7; }
+
+/* ===== Tabs ===== */
+.tabs{
+  width:100%; max-width:1200px; display:flex; gap:28px;
+  border-bottom:2px solid #eee; padding:10px 0; margin:14px 0 18px;
+}
+.tab{
+  position:relative; padding:10px 2px; text-decoration:none; color:#111; font-weight:700;
+}
+.tab.active::after{
+  content:""; position:absolute; left:0; right:0; bottom:-10px; height:3px;
+  background:#111; border-radius:2px;
+}
+
+/* ===== Content / Wines ===== */
+.content{ width:100%; max-width:1200px; }
+.cards-title{ font-size:22px; margin: 0 0 16px; text-align:center; }
+.grid{
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 22px;
+}
+.card{
+  border:1px solid #eee; border-radius:14px; background:#fff;
+  box-shadow: 0 4px 14px rgba(0,0,0,.06);
+  overflow:hidden;
+  transition: transform .14s ease;
+}
+.card:hover{ transform: translateY(-2px); }
+.imgbox{
+  height: 220px; display:flex; align-items:center; justify-content:center;
+  background:#fafafa;
+}
+.imgbox img{
+  max-height:200px; width:auto; object-fit:contain;
+}
+.body{ padding: 10px 12px 14px; text-align:center; }
+.name{ font-size:14px; font-weight:700; margin:0 0 4px; }
+.title{ font-size:13px; margin:0 0 6px; color:#333; }
+.meta{ font-size:12px; color:#666; margin:0; }
 </style>
