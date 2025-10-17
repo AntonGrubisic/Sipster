@@ -1,6 +1,6 @@
 <template>
   <main class="page">
-    <!-- Fade-in hero -->
+    <!-- Hero -->
     <header class="hero" v-cloak>
       <h1>The Journey of Wine</h1>
       <p class="sub">
@@ -8,7 +8,7 @@
       </p>
     </header>
 
-    <!-- 🔎 Elegant search (name or grape) -->
+    <!-- 🔎 Search -->
     <section class="search-wrap" aria-label="Wine search">
       <div class="search">
         <input
@@ -43,7 +43,7 @@
             <img
                 :src="`/images/${c.key}.jpg`"
                 :alt="c.label"
-                class="tile-img"
+                class="tile-img img-cover"
                 @error="(e) => e.target.style.visibility = 'hidden'"
                 :style="tileStyles[idx]?.img"
             />
@@ -55,14 +55,17 @@
       </TransitionGroup>
     </section>
 
-    <!-- 🕓 State messages -->
+    <!-- 🕓 Status messages -->
     <p v-if="error" class="err">{{ error }}</p>
     <p v-else-if="loading" class="loading">Loading…</p>
-    <p v-else-if="!loading && wines.length === 0 && (selectedStyle || searchTerm)" class="empty">
+    <p
+        v-else-if="!loading && wines.length === 0 && (selectedStyle || searchTerm)"
+        class="empty"
+    >
       No wines found for “{{ selectedStyle ? labelFor(selectedStyle) : searchTerm }}”.
     </p>
 
-    <!-- 🍷 Results grid -->
+    <!-- 🍷 Results -->
     <section v-if="wines.length" class="grid" aria-live="polite">
       <TransitionGroup name="fadeup" tag="div" appear>
         <div
@@ -72,7 +75,6 @@
         >
           <h2 class="country-title">{{ country }}</h2>
 
-          <!-- ✅ Lagt vinerna i en grid som matchar layouten på din bild -->
           <div class="grid-inner">
             <article
                 v-for="(w, idx) in countryWines"
@@ -81,7 +83,7 @@
                 :style="{ transitionDelay: (idx * 30) + 'ms' }"
             >
               <div class="thumb">
-                <img v-if="w.image" :src="w.image" alt=""/>
+                <img v-if="w.image" :src="w.image" alt="" class="img-cover" />
                 <div v-else class="ph">🍷</div>
               </div>
               <div class="info">
@@ -101,14 +103,14 @@
         </div>
       </TransitionGroup>
     </section>
-
-
   </main>
 </template>
-
 <script setup>
-import { ref, reactive, onMounted, nextTick, computed } from 'vue'
+import { ref, reactive, computed, onMounted, nextTick } from 'vue'
 
+/* ============================
+   🍇 DATA: WINE CATEGORIES
+============================ */
 const CATS = [
   { key: 'reds', label: 'Red' },
   { key: 'whites', label: 'White' },
@@ -117,39 +119,42 @@ const CATS = [
   { key: 'dessert', label: 'Dessert' },
 ]
 
+/* ============================
+   ⚙️ STATE VARIABLES
+============================ */
 const selectedStyle = ref('')
 const wines = ref([])
 const loading = ref(false)
 const error = ref('')
 const searchTerm = ref('')
 
-// --- Parallax hover state (per tile) ---
+/* ============================
+   🪄 PARALLAX TILE EFFECT
+============================ */
 const tileRefs = ref([])
 const tileStyles = reactive([])
 
 function ensureTileStyle(i) {
-  if (!tileStyles[i]) {
-    tileStyles[i] = { img: {}, overlay: {} }
-  }
+  if (!tileStyles[i]) tileStyles[i] = { img: {}, overlay: {} }
 }
 
 function onTileMove(e, i) {
   ensureTileStyle(i)
   const el = tileRefs.value[i]
   if (!el) return
+
   const rect = el.getBoundingClientRect()
   const x = e.clientX - rect.left
   const y = e.clientY - rect.top
   const cx = (x / rect.width) - 0.5
   const cy = (y / rect.height) - 0.5
-
   const drift = 8
+  const overlayLift = 6
+
   tileStyles[i].img = {
     transform: `translate(${(-cx * drift)}px, ${(-cy * drift)}px) scale(1.04)`,
     filter: `brightness(0.9)`
   }
-
-  const overlayLift = 6
   tileStyles[i].overlay = {
     transform: `translateY(${(-Math.abs(cy) * overlayLift)}px)`,
     opacity: 1
@@ -162,25 +167,18 @@ function onTileLeave(i) {
   tileStyles[i].overlay = { transform: 'translateY(0)' }
 }
 
-// --- Sorting helpers ---
+/* ============================
+   🔤 SORTING + GROUPING
+============================ */
 function displayName(w) {
   return (w.name || w.wine || '').toString()
 }
 
-function sortByName(arr) {
-  return (arr || []).slice().sort((a, b) => {
-    const countryA = (a.location || '').toLowerCase()
-    const countryB = (b.location || '').toLowerCase()
-    const nameA = displayName(a)
-    const nameB = displayName(b)
-
-    if (countryA < countryB) return -1
-    if (countryA > countryB) return 1
-    return nameA.localeCompare(nameB, undefined, { sensitivity: 'base' })
-  })
+function labelFor(styleKey) {
+  const found = CATS.find(c => c.key === styleKey)
+  return found ? found.label : styleKey
 }
 
-// --- Computed: group wines per country ---
 const groupedWines = computed(() => {
   const groups = {}
   for (const wine of wines.value) {
@@ -188,24 +186,21 @@ const groupedWines = computed(() => {
     if (!groups[country]) groups[country] = []
     groups[country].push(wine)
   }
-  // Sortera länder i alfabetisk ordning
+
   const sorted = {}
   Object.keys(groups)
       .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
-      .forEach(key => {
-        sorted[key] = groups[key].sort((a, b) =>
+      .forEach(country => {
+        sorted[country] = groups[country].sort((a, b) =>
             displayName(a).localeCompare(displayName(b), undefined, { sensitivity: 'base' })
         )
       })
   return sorted
 })
 
-function labelFor(styleKey) {
-  const f = CATS.find(c => c.key === styleKey)
-  return f ? f.label : styleKey
-}
-
-// --- Load by style ---
+/* ============================
+   🌐 API CALLS
+============================ */
 async function selectStyle(style) {
   if (selectedStyle.value === style) return
   selectedStyle.value = style
@@ -213,14 +208,12 @@ async function selectStyle(style) {
   wines.value = []
   error.value = ''
   loading.value = true
+
   try {
     const res = await fetch(`/api/wines/by-style?style=${encodeURIComponent(style)}&limit=60`)
-    if (!res.ok) {
-      const j = await res.json().catch(() => ({}))
-      throw new Error(j.error || `Request failed (${res.status})`)
-    }
+    if (!res.ok) throw new Error(`Request failed (${res.status})`)
     const data = await res.json()
-    wines.value = sortByName(data.results || [])
+    wines.value = data.results || []
     await nextTick()
   } catch (e) {
     error.value = e.message || 'Failed to load wines.'
@@ -229,7 +222,6 @@ async function selectStyle(style) {
   }
 }
 
-// --- Search wines ---
 async function searchWines() {
   const q = searchTerm.value.trim()
   if (!q) return
@@ -237,14 +229,12 @@ async function searchWines() {
   wines.value = []
   error.value = ''
   loading.value = true
+
   try {
     const res = await fetch(`/api/wines/search?q=${encodeURIComponent(q)}&limit=60`)
-    if (!res.ok) {
-      const j = await res.json().catch(() => ({}))
-      throw new Error(j.error || `Request failed (${res.status})`)
-    }
+    if (!res.ok) throw new Error(`Request failed (${res.status})`)
     const data = await res.json()
-    wines.value = sortByName(data.results || [])
+    wines.value = data.results || []
   } catch (e) {
     error.value = e.message || 'Failed to load wines.'
   } finally {
@@ -252,40 +242,37 @@ async function searchWines() {
   }
 }
 
+/* ============================
+   🧭 MOUNTING
+============================ */
 onMounted(() => {
   tileStyles.length = CATS.length
   for (let i = 0; i < CATS.length; i++) ensureTileStyle(i)
 })
 </script>
-
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700;900&display=swap');
 
-[v-cloak] {
-  opacity: 0;
-}
+[v-cloak] { opacity: 0; }
 
-/* Page + hero base */
+/* ============================
+   🌿 PAGE LAYOUT
+============================ */
 .page {
   min-height: 100vh;
-  padding: 2rem 1rem;
+  padding: 2rem 1rem 3rem;
   display: grid;
   gap: 1.5rem;
   justify-content: center;
   text-align: center;
   font-family: 'Playfair Display', serif;
-
-  /* 🌿 Elegant green background with subtle texture */
-  background-color: #e8f0e5; /* fallback if image fails */
-  background-image: url('/textures/green-fabric.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-
+  background: linear-gradient(180deg, #ffffff, #f8f8f6);
   color: #1a1a1a;
 }
 
-/* Hero fade-in */
+/* ============================
+   ✨ HERO SECTION
+============================ */
 .hero {
   text-align: center;
   margin: 0.5rem auto 0;
@@ -296,14 +283,8 @@ onMounted(() => {
 }
 
 @keyframes heroFade {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .hero h1 {
@@ -312,8 +293,8 @@ onMounted(() => {
   font-size: clamp(2.2rem, 4.2vw, 3.2rem);
   letter-spacing: -0.02em;
   line-height: 1.05;
-  color: #f5f5f0;
-  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.4);
+  color: #1a1a1a;
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.08);
 }
 
 .hero h1::after {
@@ -332,12 +313,13 @@ onMounted(() => {
   max-width: 720px;
   font-size: clamp(0.98rem, 1.4vw, 1.05rem);
   line-height: 1.55;
-  color: #e0e0dc;
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
-  opacity: 0.85;
+  color: #4b4b4b;
+  opacity: 0.9;
 }
 
-/* 🔎 Search */
+/* ============================
+   🔎 SEARCH
+============================ */
 .search-wrap {
   display: flex;
   gap: 0.5rem;
@@ -352,10 +334,11 @@ onMounted(() => {
   align-items: center;
   width: 100%;
   max-width: 360px;
-  background: #f7f4f1;
-  border: 1px solid #d9d1cb;
+  background: #fff;
+  border: 1px solid #ddd;
   border-radius: 12px;
   padding: 0.35rem 0.6rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
 }
 
 .search input {
@@ -368,9 +351,7 @@ onMounted(() => {
   padding: 0.35rem 0.25rem;
 }
 
-.search input::placeholder {
-  color: #9b8f88;
-}
+.search input::placeholder { color: #aaa; }
 
 .search-btn {
   background: #7b1113;
@@ -383,22 +364,16 @@ onMounted(() => {
   cursor: pointer;
   transition: background 0.2s ease, transform 0.1s ease;
 }
+.search-btn:hover { background: #92171a; transform: translateY(-1px); }
+.search-btn:active { transform: translateY(0); }
 
-.search-btn:hover {
-  background: #92171a;
-  transform: translateY(-1px);
-}
-
-.search-btn:active {
-  transform: translateY(0);
-}
-
-/* Tiles */
+/* ============================
+   🧩 TILES (Wine categories)
+============================ */
 .tiles {
   display: flex;
   justify-content: center;
 }
-
 .tiles-inner {
   display: flex;
   justify-content: center;
@@ -419,10 +394,7 @@ onMounted(() => {
   transition: transform 0.25s ease, box-shadow 0.25s ease;
   will-change: transform;
 }
-
-.tile:hover {
-  transform: translateY(-6px);
-}
+.tile:hover { transform: translateY(-6px); }
 
 .image-wrap {
   width: 100%;
@@ -433,28 +405,18 @@ onMounted(() => {
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
 }
 
-.tile-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 300ms ease, filter 300ms ease;
-}
-
+.tile-img { transition: transform 300ms ease, filter 300ms ease; }
 .overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.08));
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.08));
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  transition: opacity 250ms ease, transform 250ms ease;
   opacity: 0;
+  transition: opacity 250ms ease, transform 250ms ease;
 }
-
-.tile:hover .overlay {
-  opacity: 1;
-}
-
+.tile:hover .overlay { opacity: 1; }
 .label {
   color: #fff;
   font-weight: 700;
@@ -462,35 +424,24 @@ onMounted(() => {
   padding-bottom: 0.9rem;
 }
 
-/* Results */
-.grid {
-  display: grid;
-}
+/* ============================
+   🍷 RESULTS GRID
+============================ */
+.grid { display: grid; }
 
 .country-section {
   margin-top: 2.2rem;
 }
-
 .country-title {
-  font-size: 1.9rem;
+  font-size: 1.8rem;
   font-weight: 700;
-  color: #f5f5f5; /* ljus text mot mörk bakgrund */
-  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.6); /* gör texten mer läsbar */
+  color: #222;
   margin: 2.5rem 0 1.2rem;
   letter-spacing: 0.5px;
-  font-family: 'Playfair Display', serif;
   display: inline-block;
   padding-bottom: 0.35rem;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.4); /* diskret vit underline */
+  border-bottom: 2px solid rgba(0, 0, 0, 0.15);
 }
-
-
-.country-section + .country-section {
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-  padding-top: 1.5rem;
-}
-
-
 
 .grid-inner {
   display: grid;
@@ -498,7 +449,6 @@ onMounted(() => {
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   justify-content: center;
 }
-
 
 .card {
   display: grid;
@@ -508,6 +458,12 @@ onMounted(() => {
   border-radius: 16px;
   padding: .75rem;
   background: #fff;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.08);
 }
 
 .thumb {
@@ -519,40 +475,29 @@ onMounted(() => {
   display: grid;
   place-items: center;
 }
-
-.thumb img {
+.img-cover {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
+.ph { font-size: 1.5rem; }
 
-.ph {
-  font-size: 1.5rem;
-}
-
-.info {
-  display: grid;
-  gap: .25rem;
-}
-
+.info { display: grid; gap: .25rem; }
 .name {
   margin: 0;
   font-size: 1rem;
   font-weight: 700;
 }
-
 .meta {
   font-size: .9rem;
   opacity: .75;
 }
-
 .foot {
   display: flex;
   gap: .5rem;
   align-items: center;
   margin-top: .25rem;
 }
-
 .badge {
   font-size: .75rem;
   padding: .15rem .45rem;
@@ -560,40 +505,31 @@ onMounted(() => {
   border-radius: 999px;
   background: #f7f7f9;
 }
+.rating { font-size: .85rem; }
 
-.rating {
-  font-size: .85rem;
-}
+/* ============================
+   ⚠️ STATES
+============================ */
+.err { color: #b00020; }
+.loading, .empty { opacity: .85; }
 
-.err {
-  color: #b00020;
-}
-
-.loading, .empty {
-  opacity: .85;
-}
-
-/* TransitionGroup: fade/slide in + stagger */
+/* ============================
+   ✨ TRANSITIONS
+============================ */
 .fadeup-enter-from, .fadeup-appear-from {
   opacity: 0;
   transform: translateY(10px);
 }
-
 .fadeup-enter-active, .fadeup-appear-active {
-  transition: opacity .45s cubic-bezier(.22, .61, .36, 1), transform .45s cubic-bezier(.22, .61, .36, 1);
+  transition: opacity .45s cubic-bezier(.22,.61,.36,1), transform .45s cubic-bezier(.22,.61,.36,1);
 }
-
 .fadeup-leave-to {
   opacity: 0;
   transform: translateY(-6px);
 }
-
 .fadeup-leave-active {
   transition: opacity .25s ease, transform .25s ease;
   position: relative;
 }
-
-.fadeup-move {
-  transition: transform .3s ease;
-}
+.fadeup-move { transition: transform .3s ease; }
 </style>
