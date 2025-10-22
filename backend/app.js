@@ -149,11 +149,11 @@ app.get('/api/users/favorites', authMiddleware, async (req, res) => {
   try {
     // Denna fråga hämtar ENDAST de externa ID:n från vår lokala 'products' tabell.
     const sql = `
-            SELECT p.external_product_id AS wineId
-            FROM favorites f
-            JOIN products p ON f.product_id = p.id
-            WHERE f.user_id = ?
-        `;
+      SELECT p.external_product_id AS wineId
+      FROM favorites f
+             JOIN products p ON f.product_id = p.id
+      WHERE f.user_id = ?
+    `;
     const [favorites] = await pool.query(sql, [userId]);
     // Returnera bara en array av ID-strängar (t.ex. ['VIN1001', 'VIN1003'])
     res.json(favorites.map(f => f.wineId));
