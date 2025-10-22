@@ -30,14 +30,15 @@ const validatePassword = (password) => {
 
 // --- MIDDLEWARE ---
 // Mer restriktiva CORS-inställningar (ny fix)
-const allowedOrigins = process.env.CORS_ORIGINS?.split(',').map(s => s.trim()).filter(Boolean);
+const rawOrigins = process.env.CORS_ORIGINS?.split(',').map(s => s.trim()).filter(Boolean) || [];
+const allowedOrigins = rawOrigins.map(o => o.replace(/\/$/, ''));
+const originOpt = (allowedOrigins.length === 0 || allowedOrigins.includes('*')) ? true : allowedOrigins;
 app.use(cors({
-  origin: allowedOrigins?.length ? allowedOrigins : true,
+  origin: originOpt,
   methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
   allowedHeaders: ['Content-Type','Authorization'],
   credentials: false
 }));
-
 app.use(express.json()); // KRITISK: Gör att Express kan läsa JSON från Insomnia/Frontend
 
 // **********************************************
