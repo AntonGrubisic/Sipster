@@ -42,7 +42,8 @@ const submit = async () => {
   isLoading.value = true;
 
   try {
-    const userData = await loginUser(email.value, password.value);
+    // FIXEN ÄR HÄR: Skickar ETT objekt ({ email, password })
+    const userData = await loginUser({ email: email.value, password: password.value });
 
     // Logiken för att spara token (i localStorage) sker inuti authService.js
     console.log(`Successfully logged in as: ${userData.username}. Token stored.`);

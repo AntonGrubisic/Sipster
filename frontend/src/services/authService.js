@@ -1,6 +1,5 @@
 // src/services/authService.js
 
-
 const API_URL = import.meta.env.VITE_API_URL;
 const PROTECTED_URL = import.meta.env.VITE_PROTECTED_URL;
 
@@ -20,34 +19,35 @@ async function handleResponse(response) {
 
 /**
  * Registrerar en ny användare.
- * @param {string} email
- * @param {string} username
- * @param {string} password
+ * FIXAT: Funktionen tar nu emot ETT objekt (credentials)
+ * @param {object} credentials { email, username, password }
  */
-export async function registerUser({ email, username, password }) {
+export async function registerUser(credentials) {
     const response = await fetch(`${API_URL}/register`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, username, password }),
+        // Skickar det kompletta objektet
+        body: JSON.stringify(credentials),
     });
     return handleResponse(response);
 }
 
 /**
  * Loggar in användaren och sparar JWT-token i localStorage.
- * @param {string} email
- * @param {string} password
+ * FIXAT: Funktionen tar nu emot ETT objekt (credentials)
+ * @param {object} credentials { email, password }
  * @returns {Promise<any>}
  */
-export async function loginUser({ email, password }) {
+export async function loginUser(credentials) {
     const response = await fetch(`${API_URL}/login`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        // Skickar det kompletta objektet
+        body: JSON.stringify(credentials),
     });
 
     const data = await handleResponse(response);

@@ -50,8 +50,12 @@ const submit = async () => {
   isLoading.value = true;
 
   try {
-    // Observera att vi skickar name som username till backend
-    await registerUser(email.value, name.value, password.value);
+    // FIXEN: Anropa registerUser med ETT objekt ({ email, username, password })
+    await registerUser({
+      email: email.value,
+      username: name.value, // Använder Name som Username
+      password: password.value
+    });
 
     // Vid lyckad registrering, skicka användaren till inloggningssidan
     router.push('/login');
@@ -111,6 +115,7 @@ input {
   font-weight: 600;
   transition: background-color 0.2s;
 }
+
 .btn:disabled {
   background: #ccc;
   cursor: not-allowed;
@@ -122,6 +127,7 @@ input {
   color: #666;
   margin-top: 10px;
 }
+
 .error-message {
   color: #e03131;
   background-color: #fcebeb;
