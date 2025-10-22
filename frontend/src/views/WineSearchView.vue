@@ -107,14 +107,14 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, nextTick, computed } from 'vue'
+import {ref, reactive, onMounted, nextTick, computed} from 'vue'
 
 const CATS = [
-  { key: 'reds', label: 'Red' },
-  { key: 'whites', label: 'White' },
-  { key: 'rose', label: 'Rosé' },
-  { key: 'sparkling', label: 'Sparkling' },
-  { key: 'dessert', label: 'Dessert' },
+  {key: 'reds', label: 'Red'},
+  {key: 'whites', label: 'White'},
+  {key: 'rose', label: 'Rosé'},
+  {key: 'sparkling', label: 'Sparkling'},
+  {key: 'dessert', label: 'Dessert'},
 ]
 
 const selectedStyle = ref('')
@@ -129,7 +129,7 @@ const tileStyles = reactive([])
 
 function ensureTileStyle(i) {
   if (!tileStyles[i]) {
-    tileStyles[i] = { img: {}, overlay: {} }
+    tileStyles[i] = {img: {}, overlay: {}}
   }
 }
 
@@ -158,8 +158,8 @@ function onTileMove(e, i) {
 
 function onTileLeave(i) {
   ensureTileStyle(i)
-  tileStyles[i].img = { transform: 'translate(0,0) scale(1)', filter: 'brightness(1)' }
-  tileStyles[i].overlay = { transform: 'translateY(0)' }
+  tileStyles[i].img = {transform: 'translate(0,0) scale(1)', filter: 'brightness(1)'}
+  tileStyles[i].overlay = {transform: 'translateY(0)'}
 }
 
 // --- Sorting helpers ---
@@ -176,7 +176,7 @@ function sortByName(arr) {
 
     if (countryA < countryB) return -1
     if (countryA > countryB) return 1
-    return nameA.localeCompare(nameB, undefined, { sensitivity: 'base' })
+    return nameA.localeCompare(nameB, undefined, {sensitivity: 'base'})
   })
 }
 
@@ -191,10 +191,10 @@ const groupedWines = computed(() => {
   // Sortera länder i alfabetisk ordning
   const sorted = {}
   Object.keys(groups)
-      .sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }))
+      .sort((a, b) => a.localeCompare(b, undefined, {sensitivity: 'base'}))
       .forEach(key => {
         sorted[key] = groups[key].sort((a, b) =>
-            displayName(a).localeCompare(displayName(b), undefined, { sensitivity: 'base' })
+            displayName(a).localeCompare(displayName(b), undefined, {sensitivity: 'base'})
         )
       })
   return sorted
@@ -489,7 +489,6 @@ onMounted(() => {
   border-top: 1px solid rgba(0, 0, 0, 0.08);
   padding-top: 1.5rem;
 }
-
 
 
 .grid-inner {

@@ -1,0 +1,288 @@
+[
+  {
+    "dish": "beef",
+    "recommends": [
+      {
+        "query": "Cabernet Sauvignon",
+        "reason": "Classic full-bodied red for grilled/roasted beef."
+      },
+      {
+        "query": "Syrah",
+        "reason": "Peppery red complements char and richness."
+      }
+    ]
+  },
+  {
+    "dish": "chicken",
+    "recommends": [
+      {
+        "query": "Chardonnay",
+        "reason": "Buttery white for roast or creamy sauces."
+      },
+      {
+        "query": "Sauvignon Blanc",
+        "reason": "Zesty herbs and citrus for lighter dishes."
+      }
+    ]
+  },
+  {
+    "dish": "fish",
+    "recommends": [
+      {
+        "query": "Chablis",
+        "reason": "Crisp, mineral white for delicate white fish."
+      },
+      {
+        "query": "Pinot Grigio",
+        "reason": "Light and clean with subtle seafood."
+      }
+    ]
+  },
+  {
+    "dish": "salmon",
+    "recommends": [
+      {
+        "query": "Pinot Noir",
+        "reason": "Light red balances oily, rich salmon."
+      },
+      {
+        "query": "Chardonnay",
+        "reason": "Fuller white suits buttery preparations."
+      }
+    ]
+  },
+  {
+    "dish": "tuna",
+    "recommends": [
+      {
+        "query": "Rosé",
+        "reason": "Bright acidity with seared tuna."
+      },
+      {
+        "query": "Sauvignon Blanc",
+        "reason": "Fresh citrus and herbs lift the dish."
+      }
+    ]
+  },
+  {
+    "dish": "shellfish",
+    "recommends": [
+      {
+        "query": "Champagne",
+        "reason": "Bubbles and acidity match salinity."
+      },
+      {
+        "query": "Muscadet",
+        "reason": "Dry, saline white built for shellfish."
+      }
+    ]
+  },
+  {
+    "dish": "pork",
+    "recommends": [
+      {
+        "query": "Zinfandel",
+        "reason": "Juicy fruit works with BBQ/roast pork."
+      },
+      {
+        "query": "Pinot Noir",
+        "reason": "Elegant red for tenderloin and chops."
+      }
+    ]
+  },
+  {
+    "dish": "lamb",
+    "recommends": [
+      {
+        "query": "Syrah",
+        "reason": "Peppery, savory match for lamb."
+      },
+      {
+        "query": "Rioja",
+        "reason": "Tempranillo complements herbs and roast."
+      }
+    ]
+  },
+  {
+    "dish": "turkey",
+    "recommends": [
+      {
+        "query": "Pinot Noir",
+        "reason": "Light red suits lean poultry."
+      },
+      {
+        "query": "Chardonnay",
+        "reason": "Creamy white for classic sides."
+      }
+    ]
+  },
+  {
+    "dish": "vegetarian",
+    "recommends": [
+      {
+        "query": "Sauvignon Blanc",
+        "reason": "Herbal and crisp for greens and herbs."
+      },
+      {
+        "query": "Rosé",
+        "reason": "Versatile with mixed veggie plates."
+      }
+    ]
+  },
+  {
+    "dish": "vegan",
+    "recommends": [
+      {
+        "query": "Grüner Veltliner",
+        "reason": "Peppery, green notes suit veg-forward dishes."
+      },
+      {
+        "query": "Albariño",
+        "reason": "Zesty stone-fruit for plant-based meals."
+      }
+    ]
+  },
+  {
+    "dish": "salad",
+    "recommends": [
+      {
+        "query": "Sauvignon Blanc",
+        "reason": "Cuts through vinaigrette acidity."
+      },
+      {
+        "query": "Rosé",
+        "reason": "Light, refreshing, food-friendly."
+      }
+    ]
+  },
+  {
+    "dish": "pasta with tomato sauce",
+    "recommends": [
+      {
+        "query": "Chianti Classico",
+        "reason": "Sangiovese acidity matches tomato."
+      },
+      {
+        "query": "Barbera",
+        "reason": "High-acid red for red sauces."
+      }
+    ]
+  },
+  {
+    "dish": "pasta with cream sauce",
+    "recommends": [
+      {
+        "query": "Chardonnay",
+        "reason": "Creamy textures work together."
+      },
+      {
+        "query": "Soave",
+        "reason": "Italian white with subtle richness."
+      }
+    ]
+  },
+  {
+    "dish": "pizza",
+    "recommends": [
+      {
+        "query": "Sangiovese",
+        "reason": "Tomato, cheese, herbs—classic match."
+      },
+      {
+        "query": "Montepulciano",
+        "reason": "Rustic red handles hearty pies."
+      }
+    ]
+  },
+  {
+    "dish": "burger",
+    "recommends": [
+      {
+        "query": "Zinfandel",
+        "reason": "Bold fruit for juicy burgers."
+      },
+      {
+        "query": "Malbec",
+        "reason": "Plum and spice suit charred beef."
+      }
+    ]
+  },
+  {
+    "dish": "bbq ribs",
+    "recommends": [
+      {
+        "query": "Zinfandel",
+        "reason": "Sweet spice and smoke-friendly."
+      },
+      {
+        "query": "Shiraz",
+        "reason": "Bold, jammy red for saucy ribs."
+      }
+    ]
+  },
+  {
+    "dish": "spicy food",
+    "recommends": [
+      {
+        "query": "Riesling",
+        "reason": "Off-dry sweetness tames heat."
+      },
+      {
+        "query": "Gewürztraminer",
+        "reason": "Aromatic profile for chili and spice."
+      }
+    ]
+  },
+  {
+    "dish": "thai curry",
+    "recommends": [
+      {
+        "query": "Riesling",
+        "reason": "Acid and light sweetness for curry."
+      },
+      {
+        "query": "Rosé",
+        "reason": "Refreshing palate cleanser."
+      }
+    ]
+  },
+  {
+    "dish": "tacos",
+    "recommends": [
+      {
+        "query": "Tempranillo",
+        "reason": "Smoky spice pairs with fillings."
+      },
+      {
+        "query": "Rosé",
+        "reason": "Versatile with varied toppings."
+      }
+    ]
+  },
+  {
+    "dish": "cheese board",
+    "recommends": [
+      {
+        "query": "Champagne",
+        "reason": "Bubbles cut through fat and salt."
+      },
+      {
+        "query": "Port",
+        "reason": "Sweet fortified wine for blues."
+      }
+    ]
+  },
+  {
+    "dish": "chocolate dessert",
+    "recommends": [
+      {
+        "query": "Port",
+        "reason": "Rich sweetness complements cocoa."
+      },
+      {
+        "query": "Zinfandel",
+        "reason": "Dark fruit and spice for chocolate."
+      }
+    ]
+  }
+]

@@ -9,7 +9,7 @@ const auth = (req, res, next) => {
     // 1. Kontrollera att headern finns och är korrekt formaterad
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         // 401 Unauthorized
-        return res.status(401).json({ error: 'Access denied. No valid token provided.' });
+        return res.status(401).json({error: 'Access denied. No valid token provided.'});
     }
 
     const token = authHeader.replace('Bearer ', '');
@@ -26,7 +26,7 @@ const auth = (req, res, next) => {
 
     } catch (e) {
         // 401 Unauthorized om token är ogiltig eller utgången
-        res.status(401).json({ error: 'Invalid token.' });
+        res.status(401).json({error: 'Invalid token.'});
     }
 };
 
