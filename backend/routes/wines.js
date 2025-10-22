@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const {getAllWines, filterByQuery} = require('../services/winesService');
+const { getAllWines, filterByQuery } = require('../services/winesService');
 
 // ✅ GET /api/wines/health
 router.get('/health', async (_req, res) => {
@@ -14,7 +14,7 @@ router.get('/health', async (_req, res) => {
         });
     } catch (err) {
         console.error('[wines/health] error:', err);
-        res.status(502).json({ok: false, error: 'Upstream source unavailable'});
+        res.status(502).json({ ok: false, error: 'Upstream source unavailable' });
     }
 });
 
@@ -51,10 +51,10 @@ router.get('/search', async (req, res) => {
             style: w.style
         }));
 
-        res.json({query: q, count: page.length, total: filtered.length, limit, offset, results: page});
+        res.json({ query: q, count: page.length, total: filtered.length, limit, offset, results: page });
     } catch (err) {
         console.error('[wines/search] error:', err);
-        res.status(502).json({error: 'Upstream source unavailable'});
+        res.status(502).json({ error: 'Upstream source unavailable' });
     }
 });
 
@@ -66,7 +66,7 @@ router.get('/by-style', async (req, res) => {
     const offset = Math.max(parseInt(req.query.offset || '0', 10), 0);
 
     if (!VALID.includes(style)) {
-        return res.status(400).json({error: `Invalid style. Use one of: ${VALID.join(', ')}`});
+        return res.status(400).json({ error: `Invalid style. Use one of: ${VALID.join(', ')}` });
     }
 
     try {
@@ -88,10 +88,10 @@ router.get('/by-style', async (req, res) => {
             image: w.image ?? w.imageUrl ?? null
         }));
 
-        res.json({style, count: page.length, total: filtered.length, limit, offset, results: page});
+        res.json({ style, count: page.length, total: filtered.length, limit, offset, results: page });
     } catch (err) {
         console.error('[wines/by-style] error:', err);
-        res.status(502).json({error: 'Upstream source unavailable'});
+        res.status(502).json({ error: 'Upstream source unavailable' });
     }
 });
 
