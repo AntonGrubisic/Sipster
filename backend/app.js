@@ -39,7 +39,6 @@ app.use(cors({
   allowedHeaders: ['Content-Type','Authorization'],
   credentials: false
 }));
-
 app.use(express.json()); // KRITISK: Gör att Express kan läsa JSON från Insomnia/Frontend
 
 // **********************************************
