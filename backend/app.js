@@ -8,6 +8,12 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const authMiddleware = require('./middleware/auth'); // Importera JWT-skyddet
 
+// Kontrollera JWT_SECRET vid startup (ny fix)
+if (!process.env.JWT_SECRET) {
+  console.error('JWT_SECRET is not set. Please define it in the environment.');
+  process.exit(1);
+}
+
 // Importera databasanslutning
 const pool = require('./connectionMySQL');
 
@@ -23,7 +29,15 @@ const validatePassword = (password) => {
 
 
 // --- MIDDLEWARE ---
-app.use(cors());
+// Mer restriktiva CORS-inställningar (ny fix)
+const allowedOrigins = process.env.CORS_ORIGINS?.split(',').map(s => s.trim()).filter(Boolean);
+app.use(cors({
+  origin: allowedOrigins?.length ? allowedOrigins : true,
+  methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
+  allowedHeaders: ['Content-Type','Authorization'],
+  credentials: false
+}));
+
 app.use(express.json()); // KRITISK: Gör att Express kan läsa JSON från Insomnia/Frontend
 
 // **********************************************
@@ -170,23 +184,15 @@ app.post('/api/users/favorites/:externalWineId', authMiddleware, async (req, res
   const externalWineId = req.params.externalWineId; // T.ex. 'VIN1001'
 
   try {
-    // 1. Find or create product using INSERT IGNORE (Löser Race Condition)
-    const [insertResult] = await pool.query(
-        'INSERT IGNORE INTO products (external_product_id) VALUES (?)',
+    // 1. Upsert product and capture its id in one roundtrip (NY RACE-FIX)
+    const [prodResult] = await pool.query(
+        `INSERT INTO products (external_product_id)
+             VALUES (?)
+             ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id)`,
         [externalWineId]
     );
-    let productId;
-    if (insertResult.insertId > 0) {
-      // Produkten skapades nu
-      productId = insertResult.insertId;
-    } else {
-      // Produkten existerade redan, hämta dess ID
-      const [productRows] = await pool.query(
-          'SELECT id FROM products WHERE external_product_id = ?',
-          [externalWineId]
-      );
-      productId = productRows[0].id;
-    }
+    // Hämta det korrekta ID:t från antingen INSERT eller ON DUPLICATE
+    const productId = prodResult.insertId;
 
     // 2. Insert favorite, låt UNIQUE constraint (i databasen) förhindra duplicering
     const sql = 'INSERT INTO favorites (user_id, product_id) VALUES (?, ?)';
@@ -209,17 +215,13 @@ app.delete('/api/users/favorites/:externalWineId', authMiddleware, async (req, r
   const externalWineId = req.params.externalWineId; // T.ex. 'VIN1001'
 
   try {
-    // 1. Hitta det lokala product_id baserat på externa ID:t
-    const [product] = await pool.query('SELECT id FROM products WHERE external_product_id = ?', [externalWineId]);
-
-    if (product.length === 0) {
-      // Produkten finns inte i vår referens-tabell (det är okej)
-      return res.status(404).json({ error: 'Favorite not found.' });
-    }
-    const productId = product[0].id;
-
-    // 2. Utför raderingen
-    const [result] = await pool.query('DELETE FROM favorites WHERE user_id = ? AND product_id = ?', [userId, productId]);
+    // NY FIX: Förenkla DELETE med ett enda JOINED statement
+    const [result] = await pool.query(
+        `DELETE f FROM favorites f
+             JOIN products p ON p.id = f.product_id
+             WHERE f.user_id = ? AND p.external_product_id = ?`,
+        [userId, externalWineId]
+    );
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Favorite not found or already deleted.' });

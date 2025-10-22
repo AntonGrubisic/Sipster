@@ -3,7 +3,7 @@
 
 const API_URL = import.meta.env.VITE_API_URL;
 const PROTECTED_URL = import.meta.env.VITE_PROTECTED_URL;
-const BASE_URL = 'http://localhost:8080/api'; // Ny bas-URL för generiska anrop
+const BASE_URL = import.meta.env.VITE_BASE_URL || 'http://localhost:8080/api';
 
 /**
  * Hjälpfunktion för att hantera fetch-svar och fel.
