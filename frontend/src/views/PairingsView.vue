@@ -73,39 +73,39 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import {ref} from 'vue'
 
 const CATEGORIES = [
-  { key: 'beef',        label: 'Beef' },
-  { key: 'lamb',        label: 'Lamb' },
-  { key: 'veal',        label: 'Veal' },
-  { key: 'pork',        label: 'Pork' },
-  { key: 'game',        label: 'Game (venison)' },
-  { key: 'poultry',     label: 'Poultry' },
+  {key: 'beef', label: 'Beef'},
+  {key: 'lamb', label: 'Lamb'},
+  {key: 'veal', label: 'Veal'},
+  {key: 'pork', label: 'Pork'},
+  {key: 'game', label: 'Game (venison)'},
+  {key: 'poultry', label: 'Poultry'},
 
-  { key: 'lean-fish',   label: 'Lean fish' },
-  { key: 'rich-fish',   label: 'Rich fish (salmon, tuna)' },
-  { key: 'shellfish',   label: 'Shellfish' },
+  {key: 'lean-fish', label: 'Lean fish'},
+  {key: 'rich-fish', label: 'Rich fish (salmon, tuna)'},
+  {key: 'shellfish', label: 'Shellfish'},
 
-  { key: 'vegetarian',  label: 'Vegetarian' },
-  { key: 'mushrooms',   label: 'Mushrooms' },
-  { key: 'spicy-food',  label: 'Spicy food' },
+  {key: 'vegetarian', label: 'Vegetarian'},
+  {key: 'mushrooms', label: 'Mushrooms'},
+  {key: 'spicy-food', label: 'Spicy food'},
 
-  { key: 'soft-cheese', label: 'Mild & soft cheese' },
-  { key: 'hard-cheese', label: 'Mature & hard cheese' },
-  { key: 'goat-cheese', label: 'Goat cheese' },
+  {key: 'soft-cheese', label: 'Mild & soft cheese'},
+  {key: 'hard-cheese', label: 'Mature & hard cheese'},
+  {key: 'goat-cheese', label: 'Goat cheese'},
 
-  { key: 'appetizers',  label: 'Appetizers & snacks' },
-  { key: 'pasta',       label: 'Pasta' },
-  { key: 'cured-meat',  label: 'Cured meat' },
-  { key: 'aperitif',    label: 'Aperitif' },
+  {key: 'appetizers', label: 'Appetizers & snacks'},
+  {key: 'pasta', label: 'Pasta'},
+  {key: 'cured-meat', label: 'Cured meat'},
+  {key: 'aperitif', label: 'Aperitif'},
 ]
 
 const activeKey = ref('')
-const tried     = ref(false)
-const loading   = ref(false)
-const error     = ref('')
-const results   = ref([])
+const tried = ref(false)
+const loading = ref(false)
+const error = ref('')
+const results = ref([])
 const lastQuery = ref('')
 
 function unslug(s = '') {
@@ -127,7 +127,7 @@ function normalizeFromApi(data) {
       return {
         title: g.title || g.dish || 'Recommended Pairings',
         subtitle: g.subtitle || '',
-        items: g.recommends.map(r => (typeof r === 'string' ? { query: r } : r))
+        items: g.recommends.map(r => (typeof r === 'string' ? {query: r} : r))
       }
     }
     // If it’s the “items” shape:
@@ -135,7 +135,7 @@ function normalizeFromApi(data) {
     return {
       title: g.title || 'Recommended Pairings',
       subtitle: g.subtitle || '',
-      items: items.map(r => (typeof r === 'string' ? { query: r } : r))
+      items: items.map(r => (typeof r === 'string' ? {query: r} : r))
     }
   })
 }
@@ -177,7 +177,9 @@ function quickSearch(item) {
 </script>
 
 <style scoped>
-[v-cloak] { opacity: 0; }
+[v-cloak] {
+  opacity: 0;
+}
 
 /* Page */
 .page {
@@ -197,6 +199,7 @@ function quickSearch(item) {
   max-width: 900px;
   padding: 0 1rem 0.5rem;
 }
+
 .hero h1 {
   margin: 0;
   font-weight: 900;
@@ -205,15 +208,18 @@ function quickSearch(item) {
   line-height: 1.05;
   color: #3a2c28;
 }
+
 .hero h1::after {
   content: "";
   display: block;
-  width: 84px; height: 3px;
+  width: 84px;
+  height: 3px;
   margin: 0.9rem auto 0;
   border-radius: 999px;
   background: linear-gradient(90deg, #bca897, #7b1113);
   opacity: 0.85;
 }
+
 .sub {
   margin: 0.9rem auto 0;
   max-width: 720px;
@@ -231,21 +237,26 @@ function quickSearch(item) {
   border: 1px solid #ebe6e1;
   border-radius: 16px;
   padding: 1rem;
-  box-shadow: 0 8px 16px rgba(0,0,0,.05);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, .05);
   text-align: left;
 }
+
 .panel-head {
   display: grid;
   gap: .25rem;
   padding: .25rem .25rem .5rem;
 }
+
 .panel-title {
   margin: 0;
   font-size: 1.1rem;
   font-weight: 800;
   color: #322825;
 }
-.panel-help { color: #7b6f69; }
+
+.panel-help {
+  color: #7b6f69;
+}
 
 /* Category grid */
 .cat-grid {
@@ -253,8 +264,18 @@ function quickSearch(item) {
   gap: .25rem .5rem;
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
-@media (max-width: 900px) { .cat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 560px) { .cat-grid { grid-template-columns: 1fr; } }
+
+@media (max-width: 900px) {
+  .cat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .cat-grid {
+    grid-template-columns: 1fr;
+  }
+}
 
 .cat {
   display: flex;
@@ -268,13 +289,25 @@ function quickSearch(item) {
   cursor: pointer;
   transition: background 0.3s ease, transform 0.2s ease, box-shadow .2s ease;
 }
-.cat:hover { background: #f8f5f2; transform: translateY(-2px); }
-.cat:active { transform: translateY(0); }
+
+.cat:hover {
+  background: #f8f5f2;
+  transform: translateY(-2px);
+}
+
+.cat:active {
+  transform: translateY(0);
+}
+
 .cat.active {
   background: #f4efea;
-  box-shadow: 0 4px 12px rgba(0,0,0,.04) inset;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .04) inset;
 }
-.label { font-size: .98rem; color: #2f2724; }
+
+.label {
+  font-size: .98rem;
+  color: #2f2724;
+}
 
 /* Results stack */
 .stack {
@@ -292,9 +325,10 @@ function quickSearch(item) {
   border-radius: 16px;
   background: #fff;
   padding: 1rem 1rem 0.8rem;
-  box-shadow: 0 6px 14px rgba(0,0,0,.05);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, .05);
   text-align: left;
 }
+
 .card-head {
   display: flex;
   gap: .5rem;
@@ -302,19 +336,25 @@ function quickSearch(item) {
   justify-content: space-between;
   margin-bottom: .35rem;
 }
+
 .title {
   margin: 0;
   font-weight: 800;
   font-size: 1.1rem;
   color: #2f2724;
 }
-.subtitle { color: #7a6f6a; }
+
+.subtitle {
+  color: #7a6f6a;
+}
+
 .chips {
   display: flex;
   flex-wrap: wrap;
   gap: .5rem;
   padding-bottom: .65rem;
 }
+
 .chip {
   border: 1px solid #e9e3de;
   background: #faf7f4;
@@ -326,27 +366,57 @@ function quickSearch(item) {
   cursor: pointer;
   transition: all .25s ease;
 }
+
 .chip:hover {
   background: #f3eee9;
   border-color: #d5c9c0;
   transform: scale(1.07);
-  box-shadow: 0 3px 6px rgba(0,0,0,.08);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, .08);
 }
 
 /* Error / Empty */
-.err   { color: #b00020; text-align: center; }
-.empty { opacity: .9; text-align: center; }
+.err {
+  color: #b00020;
+  text-align: center;
+}
+
+.empty {
+  opacity: .9;
+  text-align: center;
+}
 
 /* Skeleton */
-@keyframes shimmer { 0% { background-position: -450px 0; } 100% { background-position: 450px 0; } }
+@keyframes shimmer {
+  0% {
+    background-position: -450px 0;
+  }
+  100% {
+    background-position: 450px 0;
+  }
+}
+
 .sk .sk-line, .sk .sk-pill {
   background: linear-gradient(90deg, #f0ece8 25%, #f6f3f0 37%, #f0ece8 63%);
   background-size: 900px 100%;
   animation: shimmer 1.2s infinite linear forwards;
   border-radius: 8px;
 }
-.sk .sk-line { height: 16px; }
-.sk .sk-pill { height: 26px; border-radius: 999px; display: inline-block; }
-.sk-w-40 { width: 40%; }
-.sk-w-20 { width: 20%; }
+
+.sk .sk-line {
+  height: 16px;
+}
+
+.sk .sk-pill {
+  height: 26px;
+  border-radius: 999px;
+  display: inline-block;
+}
+
+.sk-w-40 {
+  width: 40%;
+}
+
+.sk-w-20 {
+  width: 20%;
+}
 </style>
