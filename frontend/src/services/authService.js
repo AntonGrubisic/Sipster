@@ -113,7 +113,8 @@ export async function getProtectedData() {
  * @returns {Promise<Array>}
  */
 export async function getWineList() {
-    // Denna route ska bytas ut mot det externa Vin-API:et när ni implementerar det!
+    // Denna route anropar vår lokala backend som returnerar 501,
+    // men den är en placeholder för det externa API:et.
     const response = await fetch(`${BASE_URL}/wines`);
     return handleResponse(response);
 }
@@ -132,6 +133,7 @@ export async function getFavorites() {
             'Authorization': `Bearer ${token}`,
         },
     });
+    // Observera att backend returnerar en array av strängar, så ingen JOIN behövs i frontend
     return handleResponse(response);
 }
 

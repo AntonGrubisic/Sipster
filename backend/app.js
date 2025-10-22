@@ -149,11 +149,11 @@ app.get('/api/users/favorites', authMiddleware, async (req, res) => {
   try {
     // Denna fråga hämtar ENDAST de externa ID:n från vår lokala 'products' tabell.
     const sql = `
-      SELECT p.external_product_id AS wineId
-      FROM favorites f
-             JOIN products p ON f.product_id = p.id
-      WHERE f.user_id = ?
-    `;
+            SELECT p.external_product_id AS wineId
+            FROM favorites f
+            JOIN products p ON f.product_id = p.id
+            WHERE f.user_id = ?
+        `;
     const [favorites] = await pool.query(sql, [userId]);
     // Returnera bara en array av ID-strängar (t.ex. ['VIN1001', 'VIN1003'])
     res.json(favorites.map(f => f.wineId));
@@ -170,31 +170,34 @@ app.post('/api/users/favorites/:externalWineId', authMiddleware, async (req, res
   const externalWineId = req.params.externalWineId; // T.ex. 'VIN1001'
 
   try {
-    // 1. Hitta eller skapa referens i vår 'products' tabell
-    let [product] = await pool.query('SELECT id FROM products WHERE external_product_id = ?', [externalWineId]);
+    // 1. Find or create product using INSERT IGNORE (Löser Race Condition)
+    const [insertResult] = await pool.query(
+        'INSERT IGNORE INTO products (external_product_id) VALUES (?)',
+        [externalWineId]
+    );
     let productId;
-
-    if (product.length === 0) {
-      // Om ID:t från Vin-API:et inte finns, lägg till det
-      const [result] = await pool.query('INSERT INTO products (external_product_id) VALUES (?)', [externalWineId]);
-      productId = result.insertId;
+    if (insertResult.insertId > 0) {
+      // Produkten skapades nu
+      productId = insertResult.insertId;
     } else {
-      productId = product[0].id;
+      // Produkten existerade redan, hämta dess ID
+      const [productRows] = await pool.query(
+          'SELECT id FROM products WHERE external_product_id = ?',
+          [externalWineId]
+      );
+      productId = productRows[0].id;
     }
 
-    // 2. Kontrollera om favoriten redan är sparad (för att undvika fel)
-    const [existing] = await pool.query('SELECT id FROM favorites WHERE user_id = ? AND product_id = ?', [userId, productId]);
-
-    if (existing.length) {
-      return res.status(409).json({ message: 'Wine is already a favorite.' });
-    }
-
-    // 3. Spara favoriten i kopplings-tabellen
+    // 2. Insert favorite, låt UNIQUE constraint (i databasen) förhindra duplicering
     const sql = 'INSERT INTO favorites (user_id, product_id) VALUES (?, ?)';
     await pool.query(sql, [userId, productId]);
     res.status(201).json({ message: 'Favorite saved successfully.' });
 
   } catch (error) {
+    // Fånga ER_DUP_ENTRY från favorites (Löser Race Condition)
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({ message: 'Wine is already a favorite.' });
+    }
     console.error('Save favorite error:', error.message);
     res.status(500).json({ error: 'Could not save favorite.' });
   }
