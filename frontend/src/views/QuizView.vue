@@ -51,8 +51,7 @@
           class="feedback"
           :class="{ ok: chosen === current.answerIndex, nope: chosen !== current.answerIndex }"
       >
-        <span v-if="chosen === current.answerIndex">Correct.</span>
-        <span v-else>Wrong — correct answer is <strong>{{ current.options[current.answerIndex] }}</strong>.</span>
+
       </p>
     </section>
 
@@ -197,7 +196,7 @@ function resetAll() {
 .topbar {
   width: min(840px, 94%);
   display: flex;
-  justify-content: flex-start; /* Back vänster */
+  justify-content: flex-start;
 }
 .back {
   appearance: none;
@@ -261,29 +260,30 @@ h1 {
   font-size: 14px;
 }
 
-/* KORTET: slutar direkt under svaren */
+/* Question card */
 .card.compact {
   width: min(640px, 92%);
+  display: block;
+  height: auto !important;
+  min-height: 0 !important;
+  padding: 16px;
   border: 1px solid #e9e9e9;
   border-radius: 14px;
-  padding: 16px 16px 10px; /* liten bottenpadding */
   background: #fff;
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  height: auto;           /* väx efter innehåll */
-  min-height: 0;          /* inga tvångshöjder */
-}
-.question {
-  margin: 0 0 12px;
-  font-size: clamp(18px, 3vw, 22px);
-  font-weight: 700;
 }
 
-/* Answers */
+/* Options */
 .options {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 15px;
+  gap: 10px;
   margin: 0;
+}
+
+.card.compact::after,
+.card.compact::before {
+  content: none !important;
 }
 @media (max-width: 520px) { .options { grid-template-columns: 1fr; } }
 
