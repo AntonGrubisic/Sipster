@@ -3,6 +3,7 @@ import LandingView from '../views/LandingView.vue'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import DashboardView from "@/views/DashboardView.vue";
+import QuizView from "@/views/QuizView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL), // pass BASE_URL (recommended)
