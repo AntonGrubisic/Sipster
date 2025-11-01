@@ -1,62 +1,56 @@
 <template>
-  <div class="wrap">
-    <div class="profile-card">
-      <!-- Topbar -->
-      <nav class="topbar">
-        <button class="back-btn" @click="goBack">← Back</button>
-      </nav>
-
-      <!-- Profile -->
-      <div class="header">
+  <div class="page">
+    <!-- Header -->
+    <header class="header">
+      <!-- Profile (left) -->
+      <div class="profile-info">
         <div class="avatar">
-          <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-               class="feather feather-user">
+          <svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
             <circle cx="12" cy="7" r="4"></circle>
           </svg>
         </div>
-
-        <div v-if="loading" class="loading">Loading profile...</div>
-        <div v-else-if="error" class="error">{{ error }}</div>
-
-        <div v-else class="user-details">
-          <h2>{{ userData.username }}</h2>
-          <p class="email">{{ userData.email }}</p>
+        <div class="identity">
+          <h2 class="name">{{ loading ? 'Loading…' : userData.username }}</h2>
+          <p class="email" v-if="!loading">{{ userData.email }}</p>
         </div>
       </div>
 
-      <hr class="divider"/>
+      <!-- Buttons (right) -->
+      <div class="actions">
+        <button class="btn ghost" @click="goBack">Back</button>
+        <button class="btn primary" @click="handleLogout">Logout</button>
+      </div>
+    </header>
 
-      <!-- Favorites -->
-      <section class="favorites">
-        <h3>Your Favorites ({{ favorites.length }})</h3>
+    <!-- Favorites Section -->
+    <main class="main">
+      <section class="panel">
+        <h2>Favorites <span class="count">({{ favorites.length }})</span></h2>
 
-        <div v-if="favoritesLoading" class="loading">Loading your wines...</div>
-        <div v-else-if="favorites.length === 0" class="empty">You have no saved favorites yet.</div>
+        <p v-if="error" class="error">{{ error }}</p>
+        <p v-else-if="favoritesLoading" class="muted">Loading your wines…</p>
+        <p v-else-if="favorites.length === 0" class="muted">You have no saved favorites yet.</p>
 
-        <ul v-else class="favorite-list">
-          <li v-for="wineId in favorites" :key="wineId" class="favorite-item">
+        <ul v-else class="fav-list">
+          <li v-for="wineId in favorites" :key="wineId" class="fav-item">
             <span>{{ wineId }}</span>
-            <button @click="handleDeleteFavorite(wineId)" class="delete-btn">Remove</button>
+            <button class="remove" @click="handleDeleteFavorite(wineId)">Remove</button>
           </li>
         </ul>
       </section>
-
-      <!-- Actions -->
-      <div class="actions">
-        <button @click="handleLogout" class="btn logout">Logout</button>
-      </div>
-    </div>
+    </main>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { getUserProfile, getFavorites, deleteFavorite, logoutUser } from '../services/authService'
+import { getUserProfile, getFavorites, deleteFavorite, logoutUser } from '@/services/authService'
 
 const router = useRouter()
+
 const userData = ref({})
 const favorites = ref([])
 const loading = ref(true)
@@ -83,8 +77,7 @@ async function loadFavorites() {
   favoritesLoading.value = true
   try {
     favorites.value = await getFavorites()
-  } catch (err) {
-    console.error('Error loading favorites:', err)
+  } catch {
     favorites.value = []
   } finally {
     favoritesLoading.value = false
@@ -92,13 +85,12 @@ async function loadFavorites() {
 }
 
 async function handleDeleteFavorite(wineId) {
-  if (confirm(`Remove ${wineId} from your favorites?`)) {
-    try {
-      await deleteFavorite(wineId)
-      await loadFavorites()
-    } catch (err) {
-      alert(`Error: ${err.message}`)
-    }
+  if (!confirm(`Remove ${wineId} from your favorites?`)) return
+  try {
+    await deleteFavorite(wineId)
+    await loadFavorites()
+  } catch (err) {
+    alert(err.message || 'Failed to remove')
   }
 }
 
@@ -114,146 +106,182 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.wrap {
+.page {
   min-height: 100vh;
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding: 50px 1rem;
+  flex-direction: column;
   background:
-      radial-gradient(800px 400px at 10% -10%, #ffe8f0 0%, transparent 45%),
-      radial-gradient(800px 400px at 90% -10%, #fff3d6 0%, transparent 45%),
+      radial-gradient(900px 450px at 10% -10%, #ffe8f0 0%, transparent 45%),
+      radial-gradient(900px 450px at 90% -10%, #fff3d6 0%, transparent 45%),
       linear-gradient(180deg, #ffffff, #f9fafb);
-}
-
-/* Profile Card */
-.profile-card {
-  width: min(440px, 100%);
-  background: #fff;
-  border: 1px solid #eee;
-  border-radius: 18px;
-  padding: 28px 30px 34px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.05);
-  text-align: center;
   color: #111;
 }
 
-/* Topbar */
-.topbar {
-  display: flex;
-  justify-content: flex-start;
-}
-.back-btn {
-  border: none;
-  background: transparent;
-  color: #111;
-  font-weight: 600;
-  cursor: pointer;
-  margin-bottom: 10px;
-  transition: opacity .15s ease;
-}
-.back-btn:hover { opacity: .7; }
-
-/* Header */
-.avatar {
-  background: #f1f1f1;
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  margin: 0 auto 16px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.user-details h2 {
-  margin: 0;
-  font-size: 22px;
-  font-weight: 700;
-}
-.email {
-  color: #777;
-  font-size: 14px;
-  margin-top: 4px;
-}
-
-/* Divider */
-.divider {
-  border: none;
-  height: 1px;
-  background: #f0f0f0;
-  margin: 26px 0;
-}
-
-/* Favorites */
-.favorites h3 {
-  font-size: 18px;
-  margin-bottom: 14px;
-  color: #222;
-}
-.favorite-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  max-height: 250px;
-  overflow-y: auto;
-}
-.favorite-item {
+/* ===== HEADER ===== */
+.header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 0;
+  background: #fff;
   border-bottom: 1px solid #eee;
-  font-size: 15px;
+  padding: 12px 40px; /* ← ökat inre utrymme */
+  box-shadow: 0 3px 12px rgba(0,0,0,0.04);
+  width: 100%;
+  height: 72px;
+  box-sizing: border-box;
 }
-.favorite-item:last-child { border-bottom: none; }
 
-.delete-btn {
-  background: #7b1113;
-  color: #fff;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 13px;
-  transition: background 0.2s ease;
+/* Profile info */
+.profile-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
 }
-.delete-btn:hover { background: #92171a; }
 
-.empty {
+.avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: #f3f3f3;
+  display: grid;
+  place-items: center;
+  border: 1px solid #ddd;
+}
+
+.identity {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.name {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 800;
+}
+.email {
+  margin: 2px 0 0;
   font-size: 14px;
-  color: #777;
+  color: #666;
 }
 
 /* Buttons */
 .actions {
-  margin-top: 30px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-right: 10px; /* ← flyttat inåt */
 }
-.btn.logout {
-  width: 100%;
+
+.btn {
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 8px 14px;
+  font-size: 14px;
+  transition: background 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn.primary {
   background: #111;
   color: #fff;
-  border: none;
-  border-radius: 10px;
-  padding: 12px 0;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s ease;
+  border: 1px solid #111;
 }
-.btn.logout:hover {
+.btn.primary:hover {
   background: #333;
 }
 
-/* Messages */
-.loading {
-  color: #555;
-  font-size: 14px;
+.btn.ghost {
+  background: #fff;
+  color: #111;
+  border: 1px solid #ddd;
+}
+.btn.ghost:hover {
+  background: #f8f8f8;
+}
+
+/* ===== MAIN ===== */
+.main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: 40px 16px;
+}
+
+.panel {
+  width: min(720px, 100%);
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 14px;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.05);
+  padding: 20px 24px;
+}
+
+.panel h2 {
+  margin: 0 0 12px;
+  text-align: center;
+  font-weight: 800;
+  font-size: 20px;
+}
+.count { color: #555; }
+
+.muted {
+  color: #666;
+  text-align: center;
+  margin: 12px 0;
 }
 .error {
   color: #b00020;
   background: #fde8eb;
-  padding: 8px;
-  border-radius: 8px;
-  font-size: 14px;
-  margin-bottom: 10px;
+  border: 1px solid #f5b1bb;
+  border-radius: 10px;
+  padding: 10px;
+  text-align: center;
+  margin: 10px auto;
+}
+
+/* ===== FAVORITE LIST ===== */
+.fav-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.fav-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #f0f0f0;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.remove {
+  border: 1px solid #7b1113;
+  background: #fff;
+  color: #7b1113;
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.remove:hover { background: #fff3f3; }
+
+/* Responsiv fix */
+@media (max-width: 640px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    height: auto;
+    gap: 10px;
+    padding: 10px 20px;
+  }
+  .actions {
+    margin-right: 0;
+    align-self: flex-end;
+  }
 }
 </style>
