@@ -124,7 +124,7 @@ onMounted(() => {
   align-items: center;
   background: #fff;
   border-bottom: 1px solid #eee;
-  padding: 12px 40px; /* ← ökat inre utrymme */
+  padding: 12px 40px;
   box-shadow: 0 3px 12px rgba(0,0,0,0.04);
   width: 100%;
   height: 72px;
@@ -173,7 +173,7 @@ onMounted(() => {
   display: flex;
   gap: 10px;
   align-items: center;
-  margin-right: 10px; /* ← flyttat inåt */
+  margin-right: 10px;
 }
 
 .btn {

@@ -1,5 +1,6 @@
 <template>
   <main class="quiz">
+    <!-- Topbar (full-width, back on right) -->
     <nav class="topbar">
       <button class="back" @click="goBack" aria-label="Go back">Back</button>
     </nav>
@@ -45,8 +46,7 @@
           v-if="answered"
           class="feedback"
           :class="{ ok: chosen === current.answerIndex, nope: chosen !== current.answerIndex }"
-      >
-      </p>
+      ></p>
     </section>
 
     <section v-else class="card result compact">
@@ -80,88 +80,28 @@ const questions = ref([
   {q: 'Marlborough is famous in…', options: ['Australia', 'South Africa', 'New Zealand', 'Chile'], answerIndex: 2},
   {q: 'Napa Valley is located in…', options: ['USA', 'France', 'Argentina', 'Spain'], answerIndex: 0},
   {q: 'Douro is a historic wine region in…', options: ['Portugal', 'Italy', 'Greece', 'Hungary'], answerIndex: 0},
-  {
-    q: 'Barossa Valley is a renowned wine region in…',
-    options: ['USA', 'Australia', 'Chile', 'South Africa'],
-    answerIndex: 1
-  },
-  {
-    q: 'Mosel is best known for Riesling wines from…',
-    options: ['Germany', 'Austria', 'France', 'Switzerland'],
-    answerIndex: 0
-  },
-  {
-    q: 'Cava is a sparkling wine traditionally from…',
-    options: ['Spain', 'Italy', 'France', 'Argentina'],
-    answerIndex: 0
-  },
+  {q: 'Barossa Valley is a renowned wine region in…', options: ['USA', 'Australia', 'Chile', 'South Africa'], answerIndex: 1},
+  {q: 'Mosel is best known for Riesling wines from…', options: ['Germany', 'Austria', 'France', 'Switzerland'], answerIndex: 0},
+  {q: 'Cava is a sparkling wine traditionally from…', options: ['Spain', 'Italy', 'France', 'Argentina'], answerIndex: 0},
   {q: 'Piedmont (Piemonte) is a key wine region in…', options: ['Italy', 'Spain', 'France', 'Croatia'], answerIndex: 0},
-  {
-    q: 'Stellenbosch is a major wine region in…',
-    options: ['Australia', 'South Africa', 'USA', 'Chile'],
-    answerIndex: 1
-  },
-  {
-    q: 'Chablis is made primarily from which grape?',
-    options: ['Riesling', 'Chardonnay', 'Sauvignon Blanc', 'Semillon'],
-    answerIndex: 1
-  },
-  {
-    q: 'Sancerre is best known for which grape?',
-    options: ['Sauvignon Blanc', 'Pinot Noir', 'Chardonnay', 'Chenin Blanc'],
-    answerIndex: 0
-  },
+  {q: 'Stellenbosch is a major wine region in…', options: ['Australia', 'South Africa', 'USA', 'Chile'], answerIndex: 1},
+  {q: 'Chablis is made primarily from which grape?', options: ['Riesling', 'Chardonnay', 'Sauvignon Blanc', 'Semillon'], answerIndex: 1},
+  {q: 'Sancerre is best known for which grape?', options: ['Sauvignon Blanc', 'Pinot Noir', 'Chardonnay', 'Chenin Blanc'], answerIndex: 0},
   {q: 'Tempranillo is most associated with…', options: ['Spain', 'Italy', 'France', 'Argentina'], answerIndex: 0},
   {q: 'Malbec is strongly associated with…', options: ['Chile', 'Argentina', 'USA', 'South Africa'], answerIndex: 1},
-  {
-    q: 'Brunello di Montalcino uses which grape?',
-    options: ['Nebbiolo', 'Sangiovese', 'Barbera', 'Montepulciano'],
-    answerIndex: 1
-  },
+  {q: 'Brunello di Montalcino uses which grape?', options: ['Nebbiolo', 'Sangiovese', 'Barbera', 'Montepulciano'], answerIndex: 1},
   {q: 'Beaujolais is primarily made from…', options: ['Pinot Noir', 'Gamay', 'Merlot', 'Syrah'], answerIndex: 1},
-  {
-    q: 'Pouilly-Fumé is a Loire wine made from…',
-    options: ['Chenin Blanc', 'Sauvignon Blanc', 'Chardonnay', 'Viognier'],
-    answerIndex: 1
-  },
-  {
-    q: 'Amarone della Valpolicella is produced in…',
-    options: ['Tuscany', 'Veneto', 'Sicily', 'Piedmont'],
-    answerIndex: 1
-  },
+  {q: 'Pouilly-Fumé is a Loire wine made from…', options: ['Chenin Blanc', 'Sauvignon Blanc', 'Chardonnay', 'Viognier'], answerIndex: 1},
+  {q: 'Amarone della Valpolicella is produced in…', options: ['Tuscany', 'Veneto', 'Sicily', 'Piedmont'], answerIndex: 1},
   {q: 'Priorat is a prestigious region in…', options: ['Portugal', 'Spain', 'Italy', 'Greece'], answerIndex: 1},
-  {
-    q: 'Barolo and Barbaresco are made from…',
-    options: ['Sangiovese', 'Nebbiolo', 'Barbera', 'Dolcetto'],
-    answerIndex: 1
-  },
+  {q: 'Barolo and Barbaresco are made from…', options: ['Sangiovese', 'Nebbiolo', 'Barbera', 'Dolcetto'], answerIndex: 1},
   {q: 'Châteauneuf-du-Pape is in…', options: ['Bordeaux', 'Rhône Valley', 'Loire', 'Languedoc'], answerIndex: 1},
   {q: 'Vinho Verde comes from…', options: ['Spain', 'Italy', 'Portugal', 'France'], answerIndex: 2},
-  {
-    q: 'Champagne must come from…',
-    options: ['Any sparkling region', 'France (any)', 'Champagne, France', 'Prosecco area'],
-    answerIndex: 2
-  },
-  {
-    q: 'Prosecco is primarily made from…',
-    options: ['Glera', 'Trebbiano', 'Verdicchio', 'Pinot Grigio'],
-    answerIndex: 0
-  },
-  {
-    q: 'Crianza/Reserva/Gran Reserva terms are from…',
-    options: ['Italy', 'France', 'Spain', 'Portugal'],
-    answerIndex: 2
-  },
-  {
-    q: 'Which grape dominates Rioja blends?',
-    options: ['Garnacha', 'Tempranillo', 'Mazuelo', 'Graciano'],
-    answerIndex: 1
-  },
-  {
-    q: 'Which region is famous for Sauvignon Blanc in NZ?',
-    options: ['Hawke’s Bay', 'Central Otago', 'Marlborough', 'Wairarapa'],
-    answerIndex: 2
-  },
+  {q: 'Champagne must come from…', options: ['Any sparkling region', 'France (any)', 'Champagne, France', 'Prosecco area'], answerIndex: 2},
+  {q: 'Prosecco is primarily made from…', options: ['Glera', 'Trebbiano', 'Verdicchio', 'Pinot Grigio'], answerIndex: 0},
+  {q: 'Crianza/Reserva/Gran Reserva terms are from…', options: ['Italy', 'France', 'Spain', 'Portugal'], answerIndex: 2},
+  {q: 'Which grape dominates Rioja blends?', options: ['Garnacha', 'Tempranillo', 'Mazuelo', 'Graciano'], answerIndex: 1},
+  {q: 'Which region is famous for Sauvignon Blanc in NZ?', options: ['Hawke’s Bay', 'Central Otago', 'Marlborough', 'Wairarapa'], answerIndex: 2},
   {q: 'Tokaji Aszú wines come from…', options: ['Romania', 'Hungary', 'Austria', 'Slovakia'], answerIndex: 1}
 ])
 
@@ -229,7 +169,7 @@ function resetAll() {
 <style scoped>
 .quiz {
   min-height: 100vh;
-  padding: 16px;
+  padding: 0 0 16px;
   display: grid;
   gap: 16px;
   justify-items: center;
@@ -239,25 +179,36 @@ function resetAll() {
   font-synthesis-weight: none;
 }
 
+/* Full-width topbar with back on right (matches profile pattern) */
 .topbar {
-  width: min(840px, 94%);
+  width: 100%;
+  height: 70px;
+  padding: 10px 40px;
+  box-sizing: border-box;
   display: flex;
-  justify-content: flex-start;
+  justify-content: flex-end;  /* back to the right */
+  align-items: center;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.04);
 }
 .back {
   appearance: none;
-  border: none;
-  background: transparent;
+  border: 1px solid #ddd;
+  background: #fff;
   color: #111;
   font-weight: 700;
-  padding: 6px 0;
+  padding: 8px 14px;
+  border-radius: 8px;
   cursor: pointer;
+  transition: background .15s ease;
 }
-.back:hover { text-decoration: underline; }
+.back:hover { background: #f8f8f8; }
 
 .head {
   width: min(640px, 92%);
   text-align: center;
+  margin-top: 6px;
 }
 h1 {
   margin: 0;
@@ -319,7 +270,7 @@ h1 {
   margin: 0 0 16px;
   font-size: clamp(18px, 3vw, 22px);
   font-weight: 700;
-  text-align: center;     /* centrera frågan */
+  text-align: center;
 }
 
 .options {
