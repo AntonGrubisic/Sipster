@@ -179,14 +179,14 @@ function resetAll() {
   font-synthesis-weight: none;
 }
 
-/* Full-width topbar with back on right (matches profile pattern) */
+/* Topbar */
 .topbar {
   width: 100%;
   height: 70px;
   padding: 10px 40px;
   box-sizing: border-box;
   display: flex;
-  justify-content: flex-end;  /* back to the right */
+  justify-content: flex-end;
   align-items: center;
   background: #fff;
   border-bottom: 1px solid #eee;
@@ -226,7 +226,7 @@ h1 {
 }
 .qprogress {
   height: 100%;
-  width: 0%;
+  width: 0;
   background: linear-gradient(90deg, #cfcfcf, #9f9f9f);
   border-radius: 999px;
   transition: width 0.35s ease;
@@ -242,7 +242,7 @@ h1 {
 }
 .progress {
   height: 100%;
-  width: 0%;
+  width: 0;
   background: linear-gradient(90deg, #7b1113, #a8181c);
   border-radius: 999px;
   transition: width 0.4s ease;
