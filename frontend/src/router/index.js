@@ -11,7 +11,7 @@ const router = createRouter({
     { path: '/', component: LandingView },
     { path: '/login', component: LoginView },
     { path: '/register', component: RegisterView },
-    { path: '/quiz', component: QuizView },
+    { path: '/quiz', component: QuizView, meta: { requiresAuth: true } },
     { path: '/profile', component: ProfileView }
   ]
 })
