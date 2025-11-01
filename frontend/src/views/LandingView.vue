@@ -23,15 +23,18 @@
       </div>
 
       <!-- AUTH-ACTIONS -->
+      <!-- AUTH-ACTIONS -->
       <div class="auth-actions">
         <template v-if="!isAuthenticated">
           <router-link to="/login" class="btn tiny primary">Login</router-link>
           <router-link to="/register" class="btn tiny ghost">Signup</router-link>
         </template>
         <template v-else>
+          <router-link to="/profile" class="btn tiny ghost">Profile</router-link>
           <button @click="handleLogout" class="btn tiny primary">Logout</button>
         </template>
       </div>
+
     </header>
 
     <!-- MENY -->
