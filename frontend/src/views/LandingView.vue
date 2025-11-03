@@ -29,6 +29,7 @@
           <router-link to="/register" class="btn tiny ghost">Signup</router-link>
         </template>
         <template v-else>
+          <router-link to="/profile" class="btn tiny ghost">Profile</router-link>
           <button @click="handleLogout" class="btn tiny primary">Logout</button>
         </template>
       </div>
@@ -38,13 +39,21 @@
     <nav class="tabs" aria-label="Main menu">
       <router-link class="tab" to="/wines" :class="{ active: isActive('/wines') }">Wines</router-link>
       <router-link class="tab" to="/pairings" :class="{ active: isActive('/pairings') }">Pairings</router-link>
+      <router-link
+          v-if="isAuthenticated"
+          class="tab"
+          to="/quiz"
+          :class="{ active: isActive('/quiz') }"
+      >
+        Quiz
+      </router-link>
     </nav>
 
     <!-- Recommended Wines -->
     <main class="content">
       <h2 class="cards-title">Recommended Wines</h2>
       <div class="grid">
-        <article v-for="w in wines" :key="w.id" class="card" >
+        <article v-for="w in wines" :key="w.id" class="card">
           <div class="imgbox">
             <img :src="w.image" :alt="w.name"/>
           </div>

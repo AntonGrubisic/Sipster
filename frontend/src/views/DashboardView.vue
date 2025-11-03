@@ -34,6 +34,7 @@
     <nav class="tabs" aria-label="Main menu">
       <router-link class="tab" to="/wines" :class="{ active: isActive('/wines') }">Wines</router-link>
       <router-link class="tab" to="/pairings" :class="{ active: isActive('/pairings') }">Pairings</router-link>
+      <router-link class="tab" to="/quiz" :class="{ active: isActive('/quiz') }">Quiz</router-link>
     </nav>
 
 

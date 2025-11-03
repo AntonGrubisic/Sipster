@@ -14,6 +14,18 @@ const router = createRouter({
         {path: '/dashboard', component: DashboardView},
         {path: '/wines', name: 'wines', component: WineBrowserView},
     ]
+import QuizView from "@/views/QuizView.vue";
+import ProfileView from "@/views/ProfileView.vue";
+
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL), // pass BASE_URL (recommended)
+  routes: [
+    { path: '/', component: LandingView },
+    { path: '/login', component: LoginView },
+    { path: '/register', component: RegisterView },
+    { path: '/quiz', component: QuizView, meta: { requiresAuth: true } },
+    { path: '/profile', component: ProfileView }
+  ]
 })
 
 export default router
