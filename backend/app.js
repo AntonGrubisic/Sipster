@@ -242,7 +242,7 @@ app.delete('/api/users/favorites/:externalWineId', authMiddleware, async (req, r
 
 // --- WINE BROWSER ROUTES ---
 const wineBrowserRoute = require('./routes/wineBrowser');
-app.use('/api/wine-Browser', wineBrowserRoute);
+app.use('/api/wine-browser', wineBrowserRoute);
 
 // GET /api/wines - Publik vinlista (US4)
 app.get('/api/wines', async (_req, res) => {
