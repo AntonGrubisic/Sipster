@@ -240,6 +240,10 @@ app.delete('/api/users/favorites/:externalWineId', authMiddleware, async (req, r
 // ** PUBLIKA OCH HÄLSA ROUTES **
 // **********************************************
 
+// --- WINE BROWSER ROUTES ---
+const wineBrowserRoute = require('./routes/wineBrowser');
+app.use('/api/wine-Browser', wineBrowserRoute);
+
 // GET /api/wines - Publik vinlista (US4)
 app.get('/api/wines', async (_req, res) => {
     // Denna route ska anropa det externa Vin-API:et i framtiden.
