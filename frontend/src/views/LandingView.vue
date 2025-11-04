@@ -29,6 +29,7 @@
           <router-link to="/register" class="btn tiny ghost">Signup</router-link>
         </template>
         <template v-else>
+          <router-link to="/profile" class="btn tiny ghost">Profile</router-link>
           <button @click="handleLogout" class="btn tiny primary">Logout</button>
         </template>
       </div>
