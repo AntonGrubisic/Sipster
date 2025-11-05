@@ -73,7 +73,7 @@ const q = ref('')
 
 function goSearch() {
   const query = q.value.trim()
-  router.push({path: '/wines', query: query ? {q: query} : undefined})
+      + router.push({ path: '/wine-browser', query: query ? { q: query } : undefined })
 }
 
 function isActive(prefix) {

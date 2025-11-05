@@ -7,7 +7,6 @@ import ProfileView from "@/views/ProfileView.vue";
 import WineBrowserView from "@/views/WineBrowserView.vue";
 import CulinaryPairingsView from "@/views/CulinaryPairingsView.vue";
 
-
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL), // pass BASE_URL (recommended)
     routes: [
@@ -16,9 +15,8 @@ const router = createRouter({
         {path: '/register', component: RegisterView},
         {path: '/quiz', component: QuizView, meta: {requiresAuth: true}},
         {path: '/profile', component: ProfileView},
-        {path: "/wine-browser", name: "wine-browser", component: WineBrowserView},
-        {path: "/culinary-pairings", name: "culinary-pairings", component: CulinaryPairingsView},
-
+        {path: '/wine-browser', component: WineBrowserView},
+        {path: '/culinary-pairings', component: CulinaryPairingsView},
     ]
 })
 
