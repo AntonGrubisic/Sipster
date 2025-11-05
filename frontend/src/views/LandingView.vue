@@ -43,6 +43,8 @@
       <router-link class="tab" to="/quiz" :class="{ active: isActive('/quiz') }">Quiz</router-link>
     </nav>
 
+
+
     <!-- Recommended Wines -->
     <main class="content">
       <h2 class="cards-title">Recommended Wines</h2>
