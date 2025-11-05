@@ -38,7 +38,9 @@
     <!-- MENY -->
     <nav class="tabs" aria-label="Main menu">
       <router-link class="tab" to="/wine-browser" :class="{ active: isActive('/wine-browser') }">Wines</router-link>
-      <router-link class="tab" to="/culinary-pairings" :class="{ active: isActive('/culinary-pairings') }">Pairings</router-link>
+      <router-link class="tab" to="/culinary-pairings" :class="{ active: isActive('/culinary-pairings') }">Pairings
+      </router-link>
+      <router-link class="tab" to="/quiz" :class="{ active: isActive('/quiz') }">Quiz</router-link>
     </nav>
 
     <!-- Recommended Wines -->
