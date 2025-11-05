@@ -205,7 +205,6 @@ async function onClearFilters() {
     wines.value = []
     error.value = ''
     lastQuery.value = ''
-    tried.value = false
   } finally {
     isClearing.value = false
   }
