@@ -8,16 +8,16 @@ import WineBrowserView from "@/views/WineBrowserView.vue";
 import CulinaryPairingsView from "@/views/CulinaryPairingsView.vue";
 
 const router = createRouter({
-    history: createWebHistory(import.meta.env.BASE_URL), // pass BASE_URL (recommended)
-    routes: [
-        {path: '/', component: LandingView},
-        {path: '/login', component: LoginView},
-        {path: '/register', component: RegisterView},
-        {path: '/quiz', component: QuizView, meta: {requiresAuth: true}},
-        {path: '/profile', component: ProfileView},
-        {path: '/wine-browser', component: WineBrowserView},
-        {path: '/culinary-pairings', component: CulinaryPairingsView},
-    ]
+  history: createWebHistory(import.meta.env.BASE_URL), // pass BASE_URL (recommended)
+  routes: [
+    {path: '/', component: LandingView},
+    {path: '/login', component: LoginView},
+    {path: '/register', component: RegisterView},
+    {path: '/quiz', component: QuizView, meta: {requiresAuth: true}},
+    {path: '/profile', component: ProfileView},
+    {path: '/wine-browser', component: WineBrowserView},
+    {path: '/culinary-pairings', component: CulinaryPairingsView},
+  ]
 })
 
 export default router
