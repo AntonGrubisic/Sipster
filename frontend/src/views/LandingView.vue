@@ -44,7 +44,6 @@
     </nav>
 
 
-
     <!-- Recommended Wines -->
     <main class="content">
       <h2 class="cards-title">Recommended Wines</h2>
@@ -64,6 +63,7 @@
   </div>
 </template>
 
+
 <script setup>
 import {ref, onMounted, computed} from 'vue'
 import {useRouter, useRoute} from 'vue-router'
@@ -77,7 +77,7 @@ const q = ref('')
 
 function goSearch() {
   const query = q.value.trim()
-      + router.push({ path: '/wine-browser', query: query ? { q: query } : undefined })
+      + router.push({path: '/wine-browser', query: query ? {q: query} : undefined})
 }
 
 function isActive(prefix) {
