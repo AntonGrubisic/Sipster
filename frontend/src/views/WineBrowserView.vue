@@ -1,5 +1,8 @@
 <template>
   <main class="page">
+    <header class="topbar">
+      <button class="back" @click="goBack"> Go back</button>
+    </header>
     <!-- Fade-in hero -->
     <header class="hero" v-cloak>
       <h1>The Journey of Wine</h1>
@@ -108,6 +111,14 @@
 
 <script setup>
 import {ref, reactive, onMounted, nextTick, computed} from 'vue'
+import {useRouter} from 'vue-router'
+
+const router = useRouter()
+
+function goBack() {
+  if (window.history.length > 1) router.back()
+  else router.push('/')
+}
 
 const CATS = [
   {key: 'reds', label: 'Red'},
@@ -262,6 +273,36 @@ onMounted(() => {
 </script>
 
 <style scoped>
+
+.topbar {
+  width: 100%;
+  height: 70px;
+  padding: 10px 40px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, .04);
+}
+
+.back {
+  appearance: none;
+  border: 1px solid #ddd;
+  background: #fff;
+  color: #111;
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background .15s ease;
+}
+
+.back:hover {
+  background: #f8f8f8;
+}
+
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700;900&display=swap');
 
 [v-cloak] {

@@ -1,5 +1,8 @@
 <template>
   <main class="page" v-cloak>
+    <header class="topbar">
+      <button class="back" @click="goBack"> Go back</button>
+    </header>
     <!-- Hero -->
     <header class="hero">
       <h1>Culinary Harmony</h1>
@@ -96,6 +99,14 @@
 </template>
 <script setup>
 import { ref, computed } from 'vue'
+import {useRouter} from 'vue-router'
+
+const router = useRouter()
+
+function goBack() {
+  if (window.history.length > 1) router.back()
+  else router.push('/')
+}
 
 /**
  * Minimal, dependency-free version to avoid “blank page” issues:
@@ -205,12 +216,43 @@ async function onClearFilters() {
     wines.value = []
     error.value = ''
     lastQuery.value = ''
+    tried.value = false
   } finally {
     isClearing.value = false
   }
 }
 </script>
 <style scoped>
+
+.topbar {
+  width: 100%;
+  height: 70px;
+  padding: 10px 40px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, .04);
+}
+
+.back {
+  appearance: none;
+  border: 1px solid #ddd;
+  background: #fff;
+  color: #111;
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background .15s ease;
+}
+
+.back:hover {
+  background: #f8f8f8;
+}
+
 [v-cloak] { opacity: 0; }
 
 /* Page — match LandingView’s light look */
